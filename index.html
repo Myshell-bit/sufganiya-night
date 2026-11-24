@@ -536,28 +536,25 @@ const SFX={
       const o=a.createOscillator(),g3=a.createGain();o.type="triangle";o.frequency.setValueAtTime(230,at);o.frequency.exponentialRampToValueAtTime(150,at+.05);
       g3.gain.setValueAtTime(.0001,at);g3.gain.exponentialRampToValueAtTime(.35*v,at+.002);g3.gain.exponentialRampToValueAtTime(.0001,at+.07);
       o.connect(g3).connect(MS);o.start(at);o.stop(at+.08)};
-    /* steady roll, a bit lighter so the riser sits on top */
-    const rate=24,n=Math.floor(dur*rate);
-    for(let k=0;k<n;k++){const p=k/n,v=(.1+.6*p**1.5)*(k%2?.82:1)*(.92+Math.random()*.16);hit(.03+k/rate+Math.random()*.004,v)}
-    /* tension riser: detuned saws climbing an octave, filter opening */
-    const lp=a.createBiquadFilter(),rg=a.createGain();lp.type="lowpass";lp.Q.value=6;
-    lp.frequency.setValueAtTime(300,T);lp.frequency.exponentialRampToValueAtTime(3800,T+dur);
-    rg.gain.setValueAtTime(.0001,T);rg.gain.exponentialRampToValueAtTime(.05,T+.4);rg.gain.exponentialRampToValueAtTime(.16,T+dur-.02);rg.gain.linearRampToValueAtTime(0,T+dur);
-    lp.connect(rg).connect(MS);
-    [[196,-9],[196,9],[294,0]].forEach(([f,d])=>{const o=a.createOscillator();o.type="sawtooth";o.detune.value=d;
-      o.frequency.setValueAtTime(f,T);o.frequency.exponentialRampToValueAtTime(f*2,T+dur);o.connect(lp);o.start(T);o.stop(T+dur+.02)});
-    /* heartbeat bass pulse that speeds up */
-    let bt=.05,gap=.55;while(bt<dur-.1){tone(95,bt,.22,{type:"sine",vol:.35+.3*bt/dur,to:45});bt+=gap;gap=Math.max(.2,gap*.85)}
-    /* hard stop: "ba-dum!" */
-    hit(dur,1.4);tone(130,dur,.5,{type:"sine",vol:.9,to:45});
+    /* timpani stroke: deep tuned drum */
+    const timp=(t,v,f=87)=>{tone(f,t,1.1,{type:"sine",vol:.5*v,to:f*.97});tone(f*1.5,t,.5,{type:"sine",vol:.12*v});noise(t,.12,{type:"lowpass",f:500,vol:.25*v})};
+    /* long orchestral crescendo: snare + timpani rolling together, starting almost silent */
+    const rate=22,n=Math.floor(dur*rate);
+    for(let k=0;k<n;k++){const p=k/n,v=(.04+.96*p**2.2)*(k%2?.84:1)*(.92+Math.random()*.16);hit(.03+k/rate+Math.random()*.004,v*.85)}
+    const tr=13,tn=Math.floor(dur*tr);
+    for(let k=0;k<tn;k++){const p=k/tn,v=.05+.95*p**2;timp(.03+k/tr+Math.random()*.006,v*.7,k%2?87:86)}
+    /* ba-dum-TSSS */
+    hit(dur,1.5);timp(dur,1.4,73);tone(60,dur,.9,{type:"sine",vol:.9,to:36});
+    noise(dur,3.8,{type:"highpass",f:5000,vol:.34});noise(dur,1.8,{type:"bandpass",f:8500,q:.5,vol:.22});
+    [3150,4730,6120,8070,9500].forEach(f=>tone(f,dur,2.6,{type:"square",vol:.011}));
   },
   fanfare:()=>{
-    brass([392,494,587],.05,.2,.09);                     /* ta- */
-    brass([523,659,784,1046],.3,2.2,.09);                /* DAAA! */
-    tone(262,.3,2.2,{type:"sine",vol:.18});tone(131,.3,2.2,{type:"sine",vol:.14});
-    noise(.3,1.8,{type:"highpass",f:6000,vol:.12});
-    [1046,1318,1568,2093,2637,3136].forEach((f,k)=>tone(f,.45+k*.07,.6,{type:"sine",vol:.07}));   /* sparkle run */
-    for(let k=0;k<10;k++)tone(2093+Math.random()*2000,1+k*.13,.3,{type:"sine",vol:.035})},
+    /* ta-ta-ta-DAAA! */
+    [0,.16,.32].forEach(t=>brass([392,494,587,784],t,.14,.085));
+    brass([523,659,784,1046],.5,2.8,.1);brass([262,392],.5,2.8,.07);
+    tone(65,.5,1.6,{type:"sine",vol:.7,to:60});noise(.5,.14,{type:"lowpass",f:500,vol:.3});
+    noise(.5,3,{type:"highpass",f:5000,vol:.25});
+    [1046,1318,1568,2093,2637].forEach((f,k)=>tone(f,.75+k*.08,.7,{type:"sine",vol:.05})) },
   confetti:()=>{tone(95,0,.3,{type:"sine",vol:.7,to:38});noise(0,.12,{type:"lowpass",f:900,vol:.4});noise(.02,.7,{f:3500,to:700,q:.7,vol:.22})}
 };
 const sndBtn=$("snd");const sndLabel=()=>{sndBtn.textContent=soundOn?"Sound: on":"Sound: off"};sndLabel();
@@ -595,8 +592,8 @@ async function reveal(){
   await wait(300);step2=.5;applyStep();SFX.whoosh();
   await wait(1100);step2=1;applyStep();setTimeout(()=>SFX.pop(false),450);
   await wait(2400);step2=2;applyStep();setTimeout(()=>SFX.pop(false),450);
-  await wait(2600);cdShow("And the Sufganiya of the Night is…",false,true);SFX.drumroll(3.2);
-  await wait(3250);$("cd").hidden=true;
+  await wait(2600);cdShow("And the Sufganiya of the Night is…",false,true);SFX.drumroll(5);
+  await wait(5050);$("cd").hidden=true;
   const win=ranked()[0];showWinner(win);SFX.fanfare();confetti(110);
   [1500,3000,4500].forEach(ms=>setTimeout(()=>confetti(70),ms));
   await wait(5200);

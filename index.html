@@ -200,9 +200,9 @@ const ITEMS=[
 ];
 /* ===== SETUP: paste your Google Form + Sheet details here ===== */
 const VOTE_URL="https://myshell-bit.github.io/sufganiya-night/";
-const FORM_ACTION="";   /* https://docs.google.com/forms/d/e/<FORM_ID>/formResponse */
-const ENTRY={tira:"",mango:"",pist:"",pav:"",onion:"",tom:"",feta:""};  /* entry.123456 ids from the pre-filled link */
-const CSV_URL="";       /* File > Share > Publish to web > CSV link of the responses sheet */
+const FORM_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSfJ6E0G447ci9xU6_kJldJnbhInfXAKPP1DtVpSUmDR91k6MQ/formResponse";   /* https://docs.google.com/forms/d/e/<FORM_ID>/formResponse */
+const ENTRY={tira:"entry.561765429",mango:"entry.1680631452",pist:"entry.1908150076",pav:"entry.1756565395",onion:"entry.1649684913",tom:"entry.143714153",feta:"entry.1851281991"};  /* entry.123456 ids from the pre-filled link */
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSvM4CVlDkPTu3jGqP4Glr5OVXnli7EdySrd_Zdf5T32G8txmSYEDRa2XgIJMX2xlj-nnuJhSGbvKYX/pub?gid=662577819&single=true&output=csv";       /* File > Share > Publish to web > CSV link of the responses sheet */
 /* ================================================================= */
 const PAY_URL="https://links.payboxapp.com/AKwvhI9dk8b";            /* paste the payment link here */
 const PAY_LABEL="Pay with PayBox";
@@ -488,7 +488,7 @@ async function poll(){
     if(!res.ok)throw 0;
     const rows=parseCSV(await res.text());if(!rows.length)throw 0;
     const head=rows[0].map(norm),col={};
-    ITEMS.forEach(it=>{const i=head.findIndex(h=>h&&h.startsWith(norm(it.name).slice(0,6)));if(i>=0)col[it.id]=i});
+    ITEMS.forEach((it,k)=>{const i=head.findIndex(h=>h&&h.startsWith(norm(it.name).slice(0,6)));col[it.id]=i>=0?i:k+1});
     const next=new Map();
     rows.slice(1).forEach((r,n)=>{const v={};for(const id in col)v[id]=r[col[id]];const c=clean(v);if(Object.keys(c).length)next.set("r"+n,c)});
     const grew=next.size>votes.size&&!firstSnap;

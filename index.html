@@ -619,12 +619,12 @@ async function reveal(){
   await wait(2400);step2=2;applyStep();setTimeout(()=>SFX.pop(false),450);
   await wait(2600);cdShow("And the Sufganiya of the Night is…",false,true);SFX.drumroll(5);
   await wait(5050);$("cd").hidden=true;
-  const win=ranked()[0];showWinner(win);SFX.fanfare();confetti(110);
-  [1500,3000,4500].forEach(ms=>setTimeout(()=>confetti(70),ms));
+  const win=ranked()[0];showWinner(win);SFX.fanfare();confetti(75);
+  setTimeout(()=>confetti(45),2200);
   await wait(5200);
   step2=3;shown.add(1);applyStep();
   const w=$("win");w.classList.add("out");await wait(800);w.hidden=true;
-  step2=4;applyStep();confetti(90);setTimeout(()=>confetti(70),1600);setTimeout(()=>confetti(60),3200);
+  step2=4;applyStep();confetti(50);
   revealing=false;
 }
 function renderPay(){

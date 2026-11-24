@@ -252,12 +252,14 @@ const ITEMS=[
   {id:"tom",name:"Tomato & Chili Honey",he:"עגבניות ודבש צ'ילי",kind:"Savory"},
   {id:"feta",name:"Feta & Nigella",he:"פטה וקצח",kind:"Savory"},
   {id:"classic",name:"Classic Jam",he:"ריבה קלאסית",kind:"Sweet",tag:"The classics"},
-  {id:"dulce",name:"Dulce de Leche",he:"ריבת חלב",kind:"Sweet",tag:"The classics"}
+  {id:"dulce",name:"Dulce de Leche",he:"ריבת חלב",kind:"Sweet",tag:"The classics"},
+  {id:"sfenj",name:"Sfenj",he:"ספינג'",kind:"Sweet",tag:"The classics"},
+  {id:"eshel",name:"Eshel Sufganiyot",he:"סופגניות אשל",kind:"Sweet",tag:"The classics"}
 ];
 /* ===== SETUP: paste your Google Form + Sheet details here ===== */
 const VOTE_URL="https://myshell-bit.github.io/sufganiya-night/";
 const FORM_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSfJ6E0G447ci9xU6_kJldJnbhInfXAKPP1DtVpSUmDR91k6MQ/formResponse";   /* https://docs.google.com/forms/d/e/<FORM_ID>/formResponse */
-const ENTRY={classic:"",dulce:"",tira:"entry.561765429",mango:"entry.1680631452",pist:"entry.1908150076",pav:"entry.1756565395",onion:"entry.1649684913",tom:"entry.143714153",feta:"entry.1851281991"};  /* entry.123456 ids from the pre-filled link */
+const ENTRY={classic:"",dulce:"",sfenj:"",eshel:"",tira:"entry.561765429",mango:"entry.1680631452",pist:"entry.1908150076",pav:"entry.1756565395",onion:"entry.1649684913",tom:"entry.143714153",feta:"entry.1851281991"};  /* entry.123456 ids from the pre-filled link */
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSvM4CVlDkPTu3jGqP4Glr5OVXnli7EdySrd_Zdf5T32G8txmSYEDRa2XgIJMX2xlj-nnuJhSGbvKYX/pub?gid=662577819&single=true&output=csv";       /* File > Share > Publish to web > CSV link of the responses sheet */
 /* ================================================================= */
 const PAY_URL="https://links.payboxapp.com/AKwvhI9dk8b";            /* paste the payment link here */
@@ -369,6 +371,32 @@ const TOP={
 };
 const SMILE=`<path d="M80 118c8 9 26 9 34-2" stroke="#1a1030" stroke-width="5" fill="none" stroke-linecap="round"/>`;
 const SHADES=`<g><path d="M44 90l112-10" stroke="#111" stroke-width="6" stroke-linecap="round"/><path d="M52 90c0 15 9 22 23 21s20-11 18-25z" fill="#111"/><path d="M104 85c0 15 9 22 23 21s20-12 18-26z" fill="#111"/><path d="M63 104l9-11M70 106l6-8M114 99l9-11M121 101l6-8" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g>`;
+/* wobbly closed shape around an ellipse, for hand-made looking dough */
+function blob(cx,cy,rx,ry,seed,n=16,amp=.07){const r=rng(seed),P=[];for(let i=0;i<n;i++){const a=i/n*Math.PI*2,k=1+(r()*2-1)*amp;P.push([cx+Math.cos(a)*rx*k,cy+Math.sin(a)*ry*k])}
+  const f=v=>v.toFixed(1);let d=`M${f(P[0][0])} ${f(P[0][1])}`;
+  for(let i=0;i<n;i++){const p0=P[(i-1+n)%n],p1=P[i],p2=P[(i+1)%n],p3=P[(i+2)%n];
+    d+=` C${f(p1[0]+(p2[0]-p0[0])/6)} ${f(p1[1]+(p2[1]-p0[1])/6)} ${f(p2[0]-(p3[0]-p1[0])/6)} ${f(p2[1]-(p3[1]-p1[1])/6)} ${f(p2[0])} ${f(p2[1])}`}
+  return d+"Z"}
+const PLATE=`<ellipse cx="100" cy="151" rx="94" ry="17" fill="var(--plate)"/><path d="M14 148c20-12 152-12 172 0" stroke="#fff" stroke-opacity=".35" stroke-width="2" fill="none"/>
+  <ellipse cx="100" cy="148" rx="74" ry="10" fill="var(--plate2)"/><ellipse cx="100" cy="146" rx="72" ry="7" fill="#08154d" opacity=".45"/>`;
+const SHAPES={
+  sfenj:u=>{const top=blob(100,110,82,34,"sf",14,.05),hole=blob(100,106,25,9.5,"sh",8,.08);
+    return `<defs><radialGradient id="s${u}" cx=".4" cy=".3" r=".9"><stop offset="0" stop-color="#f7c879"/><stop offset=".5" stop-color="#df963f"/><stop offset="1" stop-color="#9c561b"/></radialGradient></defs>
+    <path d="${blob(100,124,82,30,"sb",14,.05)}" fill="#7d4013"/>
+    <path d="${top}" fill="url(#s${u})"/>
+    <path d="${hole}" fill="#5a2c0c"/><ellipse cx="100" cy="109.5" rx="19" ry="5.5" fill="var(--plate2)"/>
+    ${scatter("sk",14,34,166,96,128,(x,y,a,k)=>`<ellipse cx="${x}" cy="${y}" rx="${(5+k*7).toFixed(1)}" ry="${(2+k*2).toFixed(1)}" fill="#ffe0a3" opacity="${(.15+k*.25).toFixed(2)}" transform="rotate(${a/6-15} ${x} ${y})"/>`)}
+    <path d="M40 104c14-14 40-20 60-20" stroke="#fff" stroke-opacity=".45" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M130 92c14 3 26 10 32 18" stroke="#ffd27a" stroke-opacity=".7" stroke-width="4" fill="none" stroke-linecap="round"/>
+    ${scatter("ss",90,26,174,86,134,(x,y,a,k)=>((x-100)/80)**2+((y-112)/30)**2<1&&((x-100)/26)**2+((y-108)/11)**2>1?`<circle cx="${x}" cy="${y}" r="${(.6+k*1.3).toFixed(1)}" fill="#fff" opacity="${(.5+k*.5).toFixed(2)}"/>`:"")}`},
+  eshel:u=>{const ball=(cx,cy,r,seed)=>{const id=`e${u}${seed}`;
+      return `<defs><radialGradient id="${id}" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="#f8cd88"/><stop offset=".55" stop-color="#e09a45"/><stop offset="1" stop-color="#a65d1f"/></radialGradient></defs>
+      <ellipse cx="${cx}" cy="${cy+r*.85}" rx="${r*.9}" ry="${r*.25}" fill="#08154d" opacity=".35"/>
+      <path d="${blob(cx,cy,r,r*.92,seed,9,.07)}" fill="url(#${id})"/>
+      <ellipse cx="${cx-r*.35}" cy="${cy-r*.38}" rx="${r*.32}" ry="${r*.16}" fill="#fff" opacity=".35" transform="rotate(-30 ${cx-r*.35} ${cy-r*.38})"/>
+      ${scatter(seed+"p",34,cx-r,cx+r,cy-r,cy+r*.2,(x,y,a,k)=>((x-cx)/r)**2+((y-cy)/(r*.9))**2<.8?`<circle cx="${x}" cy="${y}" r="${(.6+k*1.5).toFixed(1)}" fill="#fff" opacity="${(.6+k*.4).toFixed(2)}"/>`:"")}`};
+    return ball(66,122,28,"e1")+ball(134,124,27,"e2")+ball(101,128,26,"e4")+ball(100,88,27,"e3")}
+};
 const SC={mango:[1.3,56],onion:[1.3,60],tom:[1.3,60],feta:[1.25,64]};
 function donut(it,o={}){
   const u=it.id+(o.k||"")+Math.random().toString(36).slice(2,6),bri=it.kind==="Savory",g=GL[it.id];
@@ -381,6 +409,7 @@ function donut(it,o={}){
     :`<ellipse cx="62" cy="76" rx="18" ry="8" transform="rotate(-30 62 76)" fill="#fff" opacity=".22"/>`;
   const face=o.face?SMILE:"";
   const shades=o.shades?SHADES:"";
+  if(SHAPES[it.id])return `<svg class="d" viewBox="0 0 200 170" aria-hidden="true">${PLATE}${SHAPES[it.id](u)}${o.face?`<g transform="translate(0 -6)">${SMILE}</g>`:""}${o.shades?`<g transform="translate(0 -6)">${SHADES}</g>`:""}</svg>`;
   return `<svg class="d" viewBox="0 0 200 170" aria-hidden="true"><defs>
   <radialGradient id="b${u}" cx=".34" cy=".22" r=".95"><stop offset="0" stop-color="${body[0]}"/><stop offset=".42" stop-color="${body[1]}"/><stop offset=".78" stop-color="${body[2]}"/><stop offset="1" stop-color="${body[3]}"/></radialGradient>
   <linearGradient id="r${u}" x2="0" y2="1"><stop offset="0" stop-color="#eab974"/><stop offset=".45" stop-color="#fcebc8"/><stop offset="1" stop-color="#e3a862"/></linearGradient>

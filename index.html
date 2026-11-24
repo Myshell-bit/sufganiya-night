@@ -173,6 +173,8 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
       <button class="ghost" id="fs">Full screen</button>
       <button class="ghost" id="toVote">Voting view</button>
       <button class="ghost" id="toLobby" hidden>Back to lobby</button>
+      <button class="ghost" id="reset">Reset votes</button>
+      <button class="ghost" id="unreset" hidden>Show earlier votes</button>
       
       <button class="cta" id="reveal">Grand reveal ✨</button>
     </span>
@@ -183,8 +185,8 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 <div id="toast" class="toast" hidden></div>
 <div class="modal" id="confirm" hidden><div>
   <h2 style="font-size:30px">Start a fresh round?</h2>
-  <p style="color:var(--mute)">Every vote will be deleted. This can't be undone.</p>
-  <div class="r"><button class="ghost" id="cNo">Keep votes</button><button class="danger" id="cYes">Delete all</button></div>
+  <p style="color:var(--mute)">The screen goes back to 0 and only counts new votes. Earlier votes stay safe in your Google Sheet, and you can bring them back.</p>
+  <div class="r"><button class="ghost" id="cNo">Keep votes</button><button class="danger" id="cYes">Reset to 0</button></div>
 </div></div>
 
 <script>
@@ -480,7 +482,13 @@ function parseCSV(t){const rows=[];let row=[],f="",q=false;for(let i=0;i<t.lengt
   if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}
   else if(c=='"')q=true;else if(c==","){row.push(f);f=""}else if(c=="\n"){row.push(f);rows.push(row);row=[];f=""}else if(c!="\r")f+=c}
   if(f||row.length){row.push(f);rows.push(row)}return rows}
-let lowReads=0;
+let lowReads=0,lastTotal=0,skip=0;
+try{skip=+localStorage.getItem("sufg-skip")||0}catch(e){}
+const setSkip=v=>{skip=v;try{localStorage.setItem("sufg-skip",String(v))}catch(e){};votes=new Map();firstSnap=true;lowReads=0;renderStage();poll()};
+$("reset").onclick=()=>{$("confirm").hidden=false};
+$("cNo").onclick=()=>{$("confirm").hidden=true};
+$("cYes").onclick=()=>{$("confirm").hidden=true;phase="lobby";step2=0;setSkip(lastTotal)};
+$("unreset").onclick=()=>setSkip(0);
 const norm=x=>String(x).toLowerCase().replace(/[^a-z]/g,"");
 async function poll(){
   if(!CSV_URL){$("sStatus").textContent="Setup needed: add the Google Sheet link.";return}
@@ -491,7 +499,9 @@ async function poll(){
     const head=rows[0].map(norm),col={};
     ITEMS.forEach((it,k)=>{const i=head.findIndex(h=>h&&h.startsWith(norm(it.name).slice(0,6)));col[it.id]=i>=0?i:k+1});
     const next=new Map();
-    rows.slice(1).forEach((r,n)=>{const v={};for(const id in col)v[id]=r[col[id]];const c=clean(v);if(Object.keys(c).length)next.set("r"+n,c)});
+    lastTotal=rows.length-1;
+    $("unreset").hidden=!skip;
+    rows.slice(1+Math.min(skip,rows.length-1)).forEach((r,n)=>{const v={};for(const id in col)v[id]=r[col[id]];const c=clean(v);if(Object.keys(c).length)next.set("r"+n,c)});
     /* Google's published CSV sometimes serves a stale or empty copy. Never drop on one bad read:
        accept fewer votes only after 4 reads in a row agree (~20 s), e.g. after rows were deleted to reset. */
     if(!firstSnap&&next.size<votes.size){lowReads++;if(lowReads<4)return}

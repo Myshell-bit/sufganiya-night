@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sufganiya Rating Night</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a party host with sunglasses on: warm, cheeky, big enough to read across a room
+   IDEA: the "Stay Sweet" Hanukkah card come alive: you light candles to rate, the winner gets the shades
+   PICTURE: one large hand-drawn sufganiya on a blue plate per step; on screen a podium of plated donuts
+   COLOUR and TYPE: Hanukkah night blue, gold sparkles, jam red; DM Serif Display + Rubik (Hebrew-ready)
+   LAYOUT: phone = one donut per screen, candles under it, sticky next; screen = title, podium, runners-up */
+:root{color-scheme:dark;--bg:#0f2a92;--deep:#091a63;--card:#17359f;--line:#3156cc;--ink:#fff;--mute:#c3cff9;--gold:#f6cd4c;--gold2:#d9a91f;--jam:#e0343f;--plate:#6f92ef;--plate2:#4a6ee0}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;color:var(--ink);background:var(--deep)}
+body{font:16px/1.5 Rubik,system-ui,sans-serif;overflow-x:clip;min-height:100svh;background:radial-gradient(110% 70% at 50% 8%,#1d3fb8 0%,var(--bg) 42%,var(--deep) 100%) fixed}
+h1,h2,.serif{font-family:"DM Serif Display",Georgia,serif;font-weight:400;line-height:1.02;text-wrap:balance;margin:0}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+[hidden]{display:none!important}
+.sky{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+@keyframes tw{0%,100%{opacity:.3;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+.tw{transform-box:fill-box;transform-origin:center;animation:tw 3.2s ease-in-out infinite}
+@keyframes flick{0%,100%{transform:scaleY(1) rotate(-2deg)}50%{transform:scaleY(1.08) rotate(2deg)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes slide{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+
+/* ---- phone ---- */
+.app{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100svh;display:flex;flex-direction:column;padding:18px 18px calc(18px + env(safe-area-inset-bottom))}
+.screenwrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;text-align:center}
+.mascot{display:block;width:min(100%,440px);aspect-ratio:1000/683;margin:-10px auto -6px;-webkit-mask-image:radial-gradient(closest-side,#000 72%,transparent);mask-image:radial-gradient(closest-side,#000 72%,transparent);animation:bob 3.4s ease-in-out infinite}
+.title{font-size:clamp(40px,11vw,56px)}
+.kicker{font-weight:800;letter-spacing:.3em;font-size:13px;color:#fff}
+.lede{color:var(--mute);max-width:24em;margin:0 auto}
+.cta{min-height:58px;border:0;border-radius:18px;background:var(--gold);color:#12207a;font-weight:800;font-size:19px;padding:0 28px;box-shadow:0 6px 0 var(--gold2),0 14px 30px #0006;transition:transform .1s,box-shadow .1s}
+.cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--gold2)}
+.cta:disabled{opacity:.45;box-shadow:none}
+.ghost{min-height:48px;border:1px solid var(--line);background:#ffffff0d;border-radius:14px;padding:0 18px;font-weight:500}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+.dots{display:flex;gap:6px;flex:1;justify-content:center}
+.dots i{height:6px;flex:1;max-width:34px;border-radius:9px;background:#ffffff26;transition:background .3s}
+.dots i.done{background:var(--gold)}.dots i.cur{background:#fff}
+.step{flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px;text-align:center;animation:slide .35s ease}
+.tag{align-self:center;font-size:13px;font-weight:700;color:#12207a;background:var(--gold);border-radius:99px;padding:3px 12px}
+.tag.sav{background:#fff}
+.hero-donut{width:min(80vw,340px);margin:0 auto}
+.dname{font-size:clamp(30px,8.4vw,42px)}
+.dhe{color:var(--mute);font-size:17px}
+.candles{display:flex;justify-content:center;gap:clamp(4px,2vw,12px);margin-top:10px}
+.candle{width:clamp(50px,14vw,64px);height:clamp(92px,25vw,112px);border:0;background:transparent;padding:0;border-radius:14px}
+.candle svg{width:100%;height:100%;overflow:visible}
+.candle .fl{transform-origin:20px 30px;transform-box:view-box;opacity:0;transform:scale(.3);transition:opacity .2s,transform .25s}
+.candle.on .fl{opacity:1;transform:none;animation:flick 1.1s ease-in-out infinite}
+.candle.on .glow{opacity:.55}
+.candle .glow{opacity:0;transition:opacity .3s}
+.candle .body{fill:#ffffff30;transition:fill .2s}
+.candle.on .body{fill:url(#wax)}
+.mood{min-height:30px;font-family:"DM Serif Display",serif;font-size:26px;color:var(--gold)}
+.mood.pop{animation:pop .35s ease}
+.nav{display:flex;gap:10px;padding-top:12px}
+.nav .cta{flex:1}.nav .ghost{min-height:58px;border-radius:18px}
+.review{display:grid;gap:8px;margin:6px 0;text-align:start}
+.rv{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 12px;width:100%;text-align:start}
+.rv svg{width:64px}
+.rv b{display:block;font-weight:700}
+.rv span{color:var(--mute);font-size:14px}
+.minis{display:flex;gap:3px}
+.minis i{width:9px;height:20px;border-radius:3px;background:#ffffff26}
+.minis i.on{background:var(--gold);box-shadow:0 -6px 8px -3px #f6cd4c99}
+.err{color:#ffb3b8;font-size:14px;min-height:20px}
+
+/* ---- big screen ---- */
+.stage{position:relative;z-index:1;min-height:100svh;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:clamp(10px,2vh,24px);padding:clamp(18px,3vw,48px) clamp(16px,4vw,72px)}
+.shead{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.shead h1{font-size:clamp(38px,5.4vw,92px)}
+.shead .kicker{margin-top:10px;font-size:clamp(12px,1.1vw,18px)}
+.count{display:flex;align-items:center;gap:14px;background:#ffffff12;border:1px solid var(--line);border-radius:24px;padding:10px 22px}
+.count b{font-family:"DM Serif Display",serif;font-weight:400;font-size:clamp(44px,5.5vw,96px);line-height:1;color:var(--gold)}
+.count span{color:var(--mute);font-size:clamp(14px,1.2vw,20px);line-height:1.2}
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:clamp(8px,2vw,36px);max-width:1300px;width:100%;margin:0 auto}
+.pod{display:flex;flex-direction:column;align-items:center;text-align:center}
+.pod svg.d{width:min(100%,clamp(120px,19vw,340px))}
+.pod.p1 svg.d{width:min(100%,clamp(150px,25vw,440px));animation:bob 3.4s ease-in-out infinite}
+.pod .nm{font-weight:800;font-size:clamp(15px,1.8vw,32px);line-height:1.15;margin-top:4px}
+.pod .sc{font-family:"DM Serif Display",serif;font-size:clamp(30px,4vw,72px);line-height:1;color:var(--gold)}
+.pod .vn{color:var(--mute);font-size:clamp(12px,1vw,18px)}
+.block{width:100%;margin-top:10px;border-radius:18px 18px 0 0;display:grid;place-items:start center;padding-top:clamp(4px,1vh,12px);font-family:"DM Serif Display",serif;font-size:clamp(26px,3.4vw,60px);line-height:1;color:#12207a;transition:height .8s cubic-bezier(.2,.8,.2,1)}
+.p1 .block{height:clamp(80px,14vh,170px);background:linear-gradient(var(--gold),var(--gold2))}
+.p2 .block{height:clamp(56px,9vh,120px);background:linear-gradient(#e9eefc,#b9c6ee)}
+.p3 .block{height:clamp(48px,7vh,90px);background:linear-gradient(#f0b98a,#c98454)}
+.rest{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:clamp(8px,1vw,16px);max-width:1300px;width:100%;margin:0 auto}
+.rt{display:grid;grid-template-columns:auto 56px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:8px 14px}
+.rt .rk{font-family:"DM Serif Display",serif;font-size:28px;color:var(--mute);width:1.2em;text-align:center}
+.rt b{font-size:clamp(14px,1.1vw,19px);line-height:1.2}
+.rt .s{font-family:"DM Serif Display",serif;font-size:clamp(22px,2vw,34px);color:var(--gold);white-space:nowrap}
+.empty{display:grid;place-items:center;text-align:center;gap:10px}
+.empty .mascot{width:clamp(260px,38vw,620px);margin:0 auto}
+.empty p{font-size:clamp(18px,2vw,34px);color:var(--mute);margin:0}
+.sfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:var(--mute);font-size:14px}
+.toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);z-index:5;background:var(--gold);color:#12207a;font-weight:800;border-radius:99px;padding:10px 22px;font-size:clamp(15px,1.4vw,24px);box-shadow:0 10px 30px #0007;animation:pop .35s ease}
+.lobby{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1fr);gap:clamp(16px,3vw,56px);align-items:center;max-width:1500px;width:100%;margin:0 auto}
+.qrcard{background:#fff;color:#0b1d6b;border-radius:28px;padding:clamp(16px,1.8vw,32px);text-align:center;box-shadow:0 20px 50px #0007;display:grid;grid-template-rows:auto auto auto;gap:clamp(8px,1vw,16px);align-content:start}
+.qrbox{width:86%;margin:0 auto;aspect-ratio:1}
+.qrcard h3{font-family:Rubik,system-ui,sans-serif;font-weight:800;font-size:clamp(24px,2.5vw,44px);line-height:1.05;letter-spacing:-.01em;margin:0;white-space:nowrap}
+.qrcard svg{display:block;width:100%;height:auto}
+.qrcard .u{font-size:clamp(13px,1.1vw,19px);color:#3a4a8a;line-height:1.35;min-height:4.05em;display:flex;align-items:center;justify-content:center}
+.qrcard.ph{background:transparent;color:var(--mute);border:3px dashed #ffffff55;box-shadow:none;aspect-ratio:4/5;display:grid;place-content:center;gap:8px}
+.qrcard.ph h3{color:#fff}
+.center{text-align:center;display:grid;justify-items:center}
+.center .mascot{width:min(100%,520px);margin:-20px auto -10px}
+#bigN{font-family:"DM Serif Display",serif;font-weight:400;font-size:clamp(90px,13vw,240px);line-height:.9;color:var(--gold);display:block}
+#bigN.pop{animation:pop .5s ease}
+.lbl2{font-size:clamp(18px,2vw,36px);font-weight:700}
+.open{display:flex;align-items:center;gap:10px;margin-top:10px;color:var(--mute);font-size:clamp(14px,1.3vw,22px)}
+.open i{width:12px;height:12px;border-radius:50%;background:#5ee08a;box-shadow:0 0 0 0 #5ee08a;animation:ping 1.6s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 12px #5ee08a00}100%{box-shadow:0 0 0 0 #5ee08a00}}
+#results{display:grid;gap:clamp(10px,2vh,24px);align-content:end}
+.pod{opacity:0;transform:translateY(80px) scale(.85);transition:opacity .9s,transform .9s cubic-bezier(.2,.9,.25,1.2)}
+.pod.show{opacity:1;transform:none}
+.pod svg.d{max-height:25vh}.pod.p1 svg.d{max-height:33vh}
+.rest{opacity:0;transform:translateY(20px);transition:opacity .8s,transform .8s}.rest.show{opacity:1;transform:none}
+.sfoot .cta{min-height:48px;font-size:17px;padding:0 22px}
+.cd{position:fixed;inset:0;z-index:8;background:radial-gradient(circle,#1d3fb8ee,#060f3dfa);display:grid;place-items:center;text-align:center;padding:5vw}
+#cdT{font-family:"DM Serif Display",serif;color:var(--gold);line-height:1;font-size:clamp(60px,9vw,160px);text-wrap:balance}
+#cdT.big{font-size:clamp(160px,32vw,520px)}
+#cdT.go{animation:pop .5s ease}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:7;overflow:hidden}
+#confetti i{position:absolute;top:-4vh;width:12px;height:18px;border-radius:3px;animation:fall linear forwards}
+@keyframes fall{to{transform:translate(var(--dx),112vh) rotate(var(--r))}}
+@media(max-width:900px){.lobby{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.center{grid-column:1/-1;order:-1}}
+.modal{position:fixed;inset:0;z-index:9;background:#000a;display:grid;place-items:center;padding:16px}
+.modal>div{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;max-width:360px;text-align:center}
+.modal .r{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.danger{background:var(--jam);border:0;border-radius:14px;padding:0 18px;min-height:48px;font-weight:700}
+@media(max-width:700px){.rest{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.candle.on .fl{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<svg class="sky" id="sky" aria-hidden="true" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1000 1000"></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="wax" x1="0" x2="1"><stop offset="0" stop-color="#dfe7ff"/><stop offset=".45" stop-color="#fff"/><stop offset="1" stop-color="#b9c8f5"/></linearGradient>
+  <radialGradient id="flame" cx=".5" cy=".7" r=".6"><stop offset="0" stop-color="#fff6c8"/><stop offset=".45" stop-color="#f6cd4c"/><stop offset="1" stop-color="#f08a24"/></radialGradient>
+  <radialGradient id="glw"><stop offset="0" stop-color="#f6cd4c"/><stop offset="1" stop-color="#f6cd4c" stop-opacity="0"/></radialGradient>
+</defs></svg>
+
+<main id="phone" class="app" hidden></main>
+
+<section id="stage" class="stage" hidden>
+  <div class="shead">
+    <div><h1>Sufganiya of the Night</h1><div class="kicker">HAPPY HANUKKAH · LIVE</div></div>
+    <div class="count" id="hcount"><b id="nV">0</b><span>guests<br>voted</span></div>
+  </div>
+  <div id="lobby" class="lobby">
+    <div class="qrcard"><h3>Scan to vote</h3><div class="qrbox" id="qrVote"></div><div class="u"><span><b>Rate the sufganiyot you tasted.</b><br>Light 1 to 5 candles for each one</span></div></div>
+    <div class="center">
+      <img class="mascot" src="mascot.jpg" alt="">
+      <b id="bigN">0</b><div class="lbl2" id="bigL">guests have voted</div>
+      <div class="open"><i></i>Voting is open</div>
+    </div>
+    <div class="qrcard pay" id="payCard"></div>
+  </div>
+  <div id="results" hidden>
+    <div id="podium" class="podium"></div>
+    <div id="rest" class="rest"></div>
+  </div>
+  <div class="sfoot">
+    <span id="sStatus">Connecting…</span>
+    <span style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="ghost" id="fs">Full screen</button>
+      <button class="ghost" id="toVote">Voting view</button>
+      <button class="ghost" id="toLobby" hidden>Back to lobby</button>
+      
+      <button class="cta" id="reveal">Grand reveal ✨</button>
+    </span>
+  </div>
+</section>
+<div id="cd" class="cd" hidden><div id="cdT"></div></div>
+<div id="confetti" aria-hidden="true"></div>
+<div id="toast" class="toast" hidden></div>
+<div class="modal" id="confirm" hidden><div>
+  <h2 style="font-size:30px">Start a fresh round?</h2>
+  <p style="color:var(--mute)">Every vote will be deleted. This can't be undone.</p>
+  <div class="r"><button class="ghost" id="cNo">Keep votes</button><button class="danger" id="cYes">Delete all</button></div>
+</div></div>
+
+<script>
+{
+const ITEMS=[
+  {id:"tira",name:"Tiramisu",he:"טירמיסו",kind:"Sweet"},
+  {id:"mango",name:"Mango & Passionfruit",he:"מנגו ופסיפלורה",kind:"Sweet"},
+  {id:"pist",name:"Pistachio & Raspberry",he:"פיסטוק ופטל",kind:"Sweet"},
+  {id:"pav",name:"Pavlova",he:"פבלובה",kind:"Sweet"},
+  {id:"onion",name:"Onion Jam & Parmesan",he:"ריבת בצל ופרמזן",kind:"Savory"},
+  {id:"tom",name:"Tomato & Chili Honey",he:"עגבניות ודבש צ'ילי",kind:"Savory"},
+  {id:"feta",name:"Feta & Nigella",he:"פטה וקצח",kind:"Savory"}
+];
+/* ===== SETUP: paste your Google Form + Sheet details here ===== */
+const VOTE_URL="https://myshell-bit.github.io/sufganiya-night/";
+const FORM_ACTION="";   /* https://docs.google.com/forms/d/e/<FORM_ID>/formResponse */
+const ENTRY={tira:"",mango:"",pist:"",pav:"",onion:"",tom:"",feta:""};  /* entry.123456 ids from the pre-filled link */
+const CSV_URL="";       /* File > Share > Publish to web > CSV link of the responses sheet */
+/* ================================================================= */
+const PAY_URL="https://links.payboxapp.com/AKwvhI9dk8b";            /* paste the payment link here */
+const PAY_LABEL="Pay with PayBox";
+function makeQR(text){
+  const bytes=[...new TextEncoder().encode(text)];
+  const ECCL=[0,10,16,26,18,24,16,18,22,22,26],NB=[0,1,1,1,2,2,4,4,4,5,5];
+  const raw=v=>{let r=(16*v+128)*v+64;if(v>=2){const n=Math.floor(v/7)+2;r-=(25*n-10)*n-55;if(v>=7)r-=36}return r};
+  const cap=v=>Math.floor(raw(v)/8)-ECCL[v]*NB[v];
+  let ver=1;while(ver<=10&&4+8+bytes.length*8>cap(ver)*8)ver++;
+  if(ver>10)throw new Error("too long");
+  const bits=[];const put=(v,n)=>{for(let i=n-1;i>=0;i--)bits.push((v>>>i)&1)};
+  put(4,4);put(bytes.length,8);bytes.forEach(b=>put(b,8));
+  const capBits=cap(ver)*8;put(0,Math.min(4,capBits-bits.length));put(0,(8-bits.length%8)%8);
+  for(let p=0xEC;bits.length<capBits;p^=0xEC^0x11)put(p,8);
+  const data=[];for(let i=0;i<bits.length;i+=8){let b=0;for(let j=0;j<8;j++)b=b<<1|bits[i+j];data.push(b)}
+  const mul=(x,y)=>{let z=0;for(let i=7;i>=0;i--){z=(z<<1)^((z>>>7)*0x11D);z^=((y>>>i)&1)*x}return z&255};
+  const deg=ECCL[ver];let gen=new Array(deg).fill(0);gen[deg-1]=1;let root=1;
+  for(let i=0;i<deg;i++){for(let j=0;j<deg;j++){gen[j]=mul(gen[j],root);if(j+1<deg)gen[j]^=gen[j+1]}root=mul(root,2)}
+  const rs=d=>{const r=new Array(deg).fill(0);for(const b of d){const f=b^r.shift();r.push(0);gen.forEach((c,i)=>r[i]^=mul(c,f))}return r};
+  const nb=NB[ver],rc=Math.floor(raw(ver)/8),nShort=nb-rc%nb,shortLen=Math.floor(rc/nb);
+  const blocks=[];for(let i=0,k=0;i<nb;i++){const dl=shortLen-deg+(i<nShort?0:1);const d=data.slice(k,k+dl);k+=dl;const e=rs(d);if(i<nShort)d.push(0);blocks.push(d.concat(e))}
+  const cw=[];for(let i=0;i<blocks[0].length;i++)blocks.forEach((b,j)=>{if(i!==shortLen-deg||j>=nShort)cw.push(b[i])});
+  const size=ver*4+17,M=[...Array(size)].map(()=>Array(size).fill(false)),F=[...Array(size)].map(()=>Array(size).fill(false));
+  const set=(x,y,d)=>{M[y][x]=d;F[y][x]=true};
+  for(let i=0;i<size;i++){set(6,i,i%2==0);set(i,6,i%2==0)}
+  const finder=(cx,cy)=>{for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const x=cx+dx,y=cy+dy,d=Math.max(Math.abs(dx),Math.abs(dy));if(x>=0&&x<size&&y>=0&&y<size)set(x,y,d!==2&&d!==4)}};
+  finder(3,3);finder(size-4,3);finder(3,size-4);
+  if(ver>=2){const n=Math.floor(ver/7)+2,step=Math.ceil((ver*4+4)/(n*2-2))*2;const pos=[6];for(let i=0,p=size-7;i<n-1;i++,p-=step)pos.splice(1,0,p);
+    pos.forEach((a,i)=>pos.forEach((b,j)=>{if((i==0&&j==0)||(i==0&&j==n-1)||(i==n-1&&j==0))return;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)set(a+dx,b+dy,Math.max(Math.abs(dx),Math.abs(dy))!==1)}))}
+  const fmt=mask=>{const d=(0<<3)|mask;let r=d;for(let i=0;i<10;i++)r=(r<<1)^((r>>>9)*0x537);const b=((d<<10)|r)^0x5412,g=i=>((b>>>i)&1)==1;
+    for(let i=0;i<=5;i++)set(8,i,g(i));set(8,7,g(6));set(8,8,g(7));set(7,8,g(8));for(let i=9;i<15;i++)set(14-i,8,g(i));
+    for(let i=0;i<8;i++)set(size-1-i,8,g(i));for(let i=8;i<15;i++)set(8,size-15+i,g(i));set(8,size-8,true)};
+  fmt(0);
+  if(ver>=7){let r=ver;for(let i=0;i<12;i++)r=(r<<1)^((r>>>11)*0x1F25);const b=ver<<12|r;for(let i=0;i<18;i++){const d=((b>>>i)&1)==1,a=size-11+i%3,c=Math.floor(i/3);set(a,c,d);set(c,a,d)}}
+  let i=0;for(let right=size-1;right>=1;right-=2){if(right==6)right=5;for(let v=0;v<size;v++)for(let j=0;j<2;j++){const x=right-j,up=((right+1)&2)==0,y=up?size-1-v:v;if(!F[y][x]&&i<cw.length*8){M[y][x]=((cw[i>>>3]>>>(7-(i&7)))&1)==1;i++}}}
+  const MK=[(x,y)=>(x+y)%2==0,(x,y)=>y%2==0,(x,y)=>x%3==0,(x,y)=>(x+y)%3==0,(x,y)=>(Math.floor(x/3)+Math.floor(y/2))%2==0,(x,y)=>x*y%2+x*y%3==0,(x,y)=>(x*y%2+x*y%3)%2==0,(x,y)=>((x+y)%2+x*y%3)%2==0];
+  const apply=m=>{for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(!F[y][x]&&MK[m](x,y))M[y][x]=!M[y][x]};
+  const pen=()=>{let p=0,dark=0;for(let y=0;y<size;y++){let rx=1,ry=1;for(let x=0;x<size;x++){if(M[y][x])dark++;if(x>0){if(M[y][x]==M[y][x-1]){rx++;if(rx==5)p+=3;else if(rx>5)p++}else rx=1;if(M[x][y]==M[x-1][y]){ry++;if(ry==5)p+=3;else if(ry>5)p++}else ry=1}
+    if(x<size-1&&y<size-1){const c=M[y][x];if(c==M[y][x+1]&&c==M[y+1][x]&&c==M[y+1][x+1])p+=3}}}
+    return p+Math.floor(Math.abs(dark*20-size*size*10)/(size*size))*10};
+  let best=0,bp=1e9;for(let m=0;m<8;m++){apply(m);fmt(m);const p=pen();if(p<bp){bp=p;best=m}apply(m)}
+  apply(best);fmt(best);
+  return M;
+}
+function qrSvg(text,dark="#0b1d6b"){const M=makeQR(text),n=M.length,q=3;let d="";M.forEach((r,y)=>r.forEach((c,x)=>{if(c)d+=`M${x+q} ${y+q}h1v1h-1z`}));return `<svg viewBox="0 0 ${n+2*q} ${n+2*q}" shape-rendering="crispEdges" aria-hidden="true"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="${dark}"/></svg>`}
+
+
+const MOODS=["","Meh","Not bad","Tasty","So good!","A great miracle!"];
+const IDS=new Set(ITEMS.map(i=>i.id));
+const $=s=>document.getElementById(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- sky ---------- */
+const spark=(x,y,r,d)=>`<path class="tw" style="animation-delay:${d}s" fill="#f6cd4c" d="M${x} ${y-r}Q${x+r*.16} ${y-r*.16} ${x+r} ${y}Q${x+r*.16} ${y+r*.16} ${x} ${y+r}Q${x-r*.16} ${y+r*.16} ${x-r} ${y}Q${x-r*.16} ${y-r*.16} ${x} ${y-r}Z"/>`;
+const swoosh=(x,y,a)=>`<rect x="${x}" y="${y}" width="46" height="12" rx="6" fill="#f6cd4c" opacity=".4" transform="rotate(${a} ${x} ${y})"/>`;
+$("sky").innerHTML=[[70,80,24],[930,120,30],[150,470,14],[890,560,20],[50,860,22],[960,900,15],[520,30,13],[720,260,10],[280,230,9],[400,780,8]].map((p,i)=>spark(p[0],p[1],p[2],i*.37)).join("")
+ +[[230,140],[790,420],[110,640],[880,760],[460,960],[640,120]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="7" fill="#f6cd4c" opacity=".7"/>`).join("")
+ +swoosh(40,300,-40)+swoosh(900,300,40)+swoosh(60,620,30)+swoosh(930,700,-30);
+
+/* ---------- donut drawing ---------- */
+function rng(seed){let h=2166136261;for(const c of seed)h=Math.imul(h^c.charCodeAt(0),16777619);return()=>{h^=h<<13;h^=h>>>17;h^=h<<5;return((h>>>0)%10000)/10000}}
+function scatter(seed,n,x0,x1,y0,y1,fn){const r=rng(seed);let o="";for(let i=0;i<n;i++){const x=x0+r()*(x1-x0),y=y0+r()*(y1-y0),a=Math.round(r()*180),k=r();o+=fn(x.toFixed(1),y.toFixed(1),a,k)}return o}
+const GL={tira:["#ffffff","#f3eee8","#d8cfc6"],mango:["#fdeaa4","#f3cf5c","#d6a42e"],pist:["#c3d27a","#9cb04c","#6f852c"],pav:["#ffffff","#f9eef1","#e3cdd4"]};
+const TOP={
+  tira:()=>scatter("t",70,46,154,48,100,(x,y,a,k)=>`<circle cx="${x}" cy="${y}" r="${(.6+k*1.1).toFixed(1)}" fill="#5a2e18" opacity="${(.25+k*.4).toFixed(2)}"/>`)
+    +`<ellipse cx="102" cy="64" rx="44" ry="8" fill="#2a1408" opacity=".18"/>
+    <path d="M58 66L74 18l24 42z" fill="#3b1d10"/><path d="M74 18l-8 46" stroke="#6e3e27" stroke-width="2.5"/><path d="M74 18l24 42" stroke="#24110a" stroke-width="1.5"/>
+    <path d="M88 60l22-50 20 54z" fill="#4c2716"/><path d="M110 10l-12 50" stroke="#7a4730" stroke-width="2.5"/>
+    <path d="M118 68l32-30 2 38z" fill="#311809"/><path d="M150 38l-22 34" stroke="#5d331f" stroke-width="2"/>`,
+  mango:()=>scatter("m",9,52,150,62,96,(x,y,a,k)=>`<ellipse cx="${x}" cy="${y}" rx="${(4+k*3).toFixed(1)}" ry="${(2.6+k*2).toFixed(1)}" fill="#f29a1c" opacity=".9"/><circle cx="${x}" cy="${y}" r="1.4" fill="#2b170c"/>`)
+    +`<ellipse cx="100" cy="66" rx="34" ry="8" fill="#a8761a" opacity=".22"/>
+    <g fill="#fff" stroke="#dfe3ee" stroke-width="1.5"><ellipse cx="78" cy="58" rx="14" ry="10"/><ellipse cx="122" cy="58" rx="14" ry="10"/><ellipse cx="90" cy="48" rx="15" ry="11"/><ellipse cx="112" cy="48" rx="15" ry="11"/><ellipse cx="100" cy="60" rx="18" ry="10"/><ellipse cx="100" cy="38" rx="13" ry="10"/><path d="M92 32c4-10 14-12 18-4-6 0-12 2-18 4z"/></g>
+    <path d="M86 46c6 4 22 4 28 0M80 56c8 3 14 3 18 0M104 56c6 3 12 3 18 0" stroke="#e3e7f2" stroke-width="2" fill="none"/>
+    <path d="M110 40c6-22 30-30 42-16 4 6 0 14-6 12-4-10-18-8-24 6z" fill="#fffaf0" stroke="#e8dcbc" stroke-width="2"/><path d="M118 34c6-10 18-14 26-8" stroke="#fff" stroke-width="2" fill="none"/>`,
+  pist:()=>{const cols=["#fff","#fff","#b8243f","#d93d5f","#7aa23a","#c8db86"];return scatter("p",46,44,156,50,100,(x,y,a,k)=>{const c=cols[Math.floor(k*cols.length)%cols.length],s=(3+k*4).toFixed(1);return `<path d="M${x} ${y}l${s} -1.5l1 ${s}l-${s} 1z" fill="${c}" transform="rotate(${a} ${x} ${y})"/>`})},
+  pav:()=>`<ellipse cx="104" cy="74" rx="44" ry="9" fill="#8a4a5c" opacity=".16"/>
+    <path d="M58 54l32-30 46 2 18 30-30 26-48-4z" fill="#fff6f8" stroke="#ecc9d3" stroke-width="2"/>
+    <path d="M58 54l48 24 30-52" stroke="#f6dde4" stroke-width="2" fill="none"/>`
+    +scatter("v",80,66,146,30,76,(x,y,a,k)=>`<circle cx="${x}" cy="${y}" r="${(.5+k*1.3).toFixed(1)}" fill="${k>.6?"#a91f45":"#d64a72"}" opacity="${(.45+k*.5).toFixed(2)}"/>`),
+  onion:()=>`<ellipse cx="100" cy="62" rx="38" ry="9" fill="#3a1606" opacity=".25"/>
+    <path d="M64 60c-4-18 14-28 36-28s40 10 36 28c-10 8-24 10-36 10s-28-2-36-10z" fill="#7a3510"/>
+    <g stroke-linecap="round" fill="none"><path d="M72 54c8-10 20-12 30-8" stroke="#a6551d" stroke-width="3.5"/><path d="M98 44c10-4 22 0 28 8" stroke="#9a4a16" stroke-width="3.5"/><path d="M78 62c10-6 26-6 36 0" stroke="#5a2508" stroke-width="3"/><path d="M110 60c8-4 14-2 18 2" stroke="#b9682a" stroke-width="3"/><path d="M84 48c4-2 8-2 12 0" stroke="#d68a46" stroke-width="2"/></g>`
+    +scatter("o",16,72,128,34,62,(x,y,a)=>`<rect x="${x}" y="${y}" width="5" height="2" rx="1" fill="#f7eccb" transform="rotate(${a} ${x} ${y})"/>`)
+    +`<path d="M100 40c2-10 6-18 12-26" stroke="#4f7a24" stroke-width="2.5" fill="none" stroke-linecap="round"/><g fill="#6d9a33">${[[103,32,-30],[107,24,40],[110,18,-20],[98,36,30]].map(p=>`<ellipse cx="${p[0]}" cy="${p[1]}" rx="4" ry="2" transform="rotate(${p[2]} ${p[0]} ${p[1]})"/>`).join("")}</g>`,
+  tom:()=>`<ellipse cx="100" cy="64" rx="36" ry="8" fill="#3a1606" opacity=".22"/>
+    <path d="M68 62c-4-14 10-20 32-20s36 6 32 20c-12 6-52 6-64 0z" fill="#fff"/><path d="M74 58c10 4 42 4 52 0" stroke="#e4e6ee" stroke-width="2" fill="none"/>
+    <path d="M70 50c6-18 34-22 46-8-6 8-30 14-46 8z" fill="#c42a16"/><path d="M76 48c8-10 26-12 34-4" stroke="#f0674a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M100 44c10-16 34-14 40 0-10 6-28 8-40 0z" fill="#d8381e"/><path d="M106 40c8-8 22-6 28 0" stroke="#ff8a66" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M98 48c-2-4 6-34 22-40 2 8-10 34-22 40z" fill="#4f8c22"/><path d="M100 44c6-14 12-26 18-32" stroke="#a6d264" stroke-width="1.6" fill="none"/>
+    <path d="M70 58c20 6 44 6 62-2" stroke="#e9a72c" stroke-width="2.5" fill="none" opacity=".85"/>`,
+  feta:()=>`<ellipse cx="100" cy="72" rx="42" ry="8" fill="#3a1606" opacity=".22"/>
+    <path d="M56 52l54-14 32 22-54 16z" fill="#fff"/><path d="M56 52l32 24v9l-32-24z" fill="#e5e8ef"/><path d="M88 76l54-16v9l-54 16z" fill="#d3d8e3"/>
+    <path d="M62 52l48-12" stroke="#eef1f6" stroke-width="2"/>`
+    +scatter("f",12,70,130,46,66,(x,y,a)=>`<ellipse cx="${x}" cy="${y}" rx="2.6" ry="1.4" fill="#151515" transform="rotate(${a} ${x} ${y})"/>`)
+    +`<path d="M114 48c2-8 4-14 8-18" stroke="#6b9a34" stroke-width="2" fill="none"/><path d="M122 30c-2-10 10-16 18-12-2 8-10 12-18 12z" fill="#6aa83a"/><path d="M122 30c-8-6-18-4-20 2 6 4 14 2 20-2z" fill="#86c04f"/>`
+};
+const SC={mango:[1.3,56],onion:[1.3,60],tom:[1.3,60],feta:[1.25,64]};
+function donut(it,o={}){
+  const u=it.id+(o.k||"")+Math.random().toString(36).slice(2,6),bri=it.kind==="Savory",g=GL[it.id];
+  const body=bri?["#f6bd68","#d9862e","#a4531a","#6a300c"]:["#fbd394","#eaa24c","#c4702a","#8c4716"];
+  const glaze=g?`<path transform="translate(0 4)" d="M32 96C30 62 60 42 100 42s70 20 68 54c-4 5-9 3-12 9-2 9-11 10-13 1-2-6-8-6-12 0-4 8-12 8-15-1-2-6-8-7-13-1-5 12-15 12-17 1-2-6-8-7-12-2-4 6-12 5-14-2-2-4-6-6-8-5z" fill="#000" opacity=".16"/>
+    <path d="M32 96C30 62 60 42 100 42s70 20 68 54c-4 5-9 3-12 9-2 9-11 10-13 1-2-6-8-6-12 0-4 8-12 8-15-1-2-6-8-7-13-1-5 12-15 12-17 1-2-6-8-7-12-2-4 6-12 5-14-2-2-4-6-6-8-5z" fill="url(#g${u})"/>
+    <path d="M50 74c10-18 28-26 48-27" stroke="#fff" stroke-opacity=".75" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="46" cy="84" r="3" fill="#fff" opacity=".7"/>`:"";
+  const ring=bri?"":`<path d="M21 110c22 12 52 17 79 17s57-5 79-17l1 13c-22 12-53 17-80 17s-58-5-80-17z" fill="url(#r${u})"/>`+scatter("s"+it.id,14,30,170,114,134,(x,y)=>`<circle cx="${x}" cy="${y}" r=".9" fill="#d9a35c" opacity=".6"/>`);
+  const shine=bri?`<ellipse cx="72" cy="66" rx="26" ry="11" transform="rotate(-28 72 66)" fill="#fff" opacity=".32"/><ellipse cx="56" cy="86" rx="6" ry="3.5" fill="#fff" opacity=".55"/><path d="M150 62c10 12 16 28 14 46" stroke="#ffe0a8" stroke-width="3" fill="none" opacity=".5" stroke-linecap="round"/>`
+    :`<ellipse cx="62" cy="76" rx="18" ry="8" transform="rotate(-30 62 76)" fill="#fff" opacity=".22"/>`;
+  const face=o.face?`<path d="M80 118c8 9 26 9 34-2" stroke="#1a1030" stroke-width="5" fill="none" stroke-linecap="round"/>`:"";
+  const shades=o.shades?`<g><path d="M44 90l112-10" stroke="#111" stroke-width="6" stroke-linecap="round"/><path d="M52 90c0 15 9 22 23 21s20-11 18-25z" fill="#111"/><path d="M104 85c0 15 9 22 23 21s20-12 18-26z" fill="#111"/><path d="M63 104l9-11M70 106l6-8M114 99l9-11M121 101l6-8" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g>`:"";
+  return `<svg class="d" viewBox="0 0 200 170" aria-hidden="true"><defs>
+  <radialGradient id="b${u}" cx=".34" cy=".22" r=".95"><stop offset="0" stop-color="${body[0]}"/><stop offset=".42" stop-color="${body[1]}"/><stop offset=".78" stop-color="${body[2]}"/><stop offset="1" stop-color="${body[3]}"/></radialGradient>
+  <linearGradient id="r${u}" x2="0" y2="1"><stop offset="0" stop-color="#eab974"/><stop offset=".45" stop-color="#fcebc8"/><stop offset="1" stop-color="#e3a862"/></linearGradient>
+  ${g?`<linearGradient id="g${u}" x2="0" y2="1"><stop offset="0" stop-color="${g[0]}"/><stop offset=".55" stop-color="${g[1]}"/><stop offset="1" stop-color="${g[2]}"/></linearGradient>`:""}
+  </defs>
+  <ellipse cx="100" cy="151" rx="94" ry="17" fill="var(--plate)"/><path d="M14 148c20-12 152-12 172 0" stroke="#fff" stroke-opacity=".35" stroke-width="2" fill="none"/>
+  <ellipse cx="100" cy="148" rx="74" ry="10" fill="var(--plate2)"/><ellipse cx="100" cy="146" rx="72" ry="7" fill="#08154d" opacity=".45"/>
+  <path d="M22 126C16 78 54 40 100 40s84 38 78 86c-3 14-36 22-78 22s-75-8-78-22z" fill="url(#b${u})"/>
+  <path d="M22 126c3 14 36 22 78 22s75-8 78-22c-22 10-50 13-78 13s-56-3-78-13z" fill="#5a2608" opacity=".35"/>
+  ${ring}${shine}${glaze}${TOP[it.id]?(SC[it.id]?`<g transform="translate(100 ${SC[it.id][1]}) scale(${SC[it.id][0]}) translate(-100 -${SC[it.id][1]})">${TOP[it.id]()}</g>`:TOP[it.id]()):""}${face}${shades}</svg>`;
+}
+const candleSvg=`<svg viewBox="0 0 40 96"><circle class="glow" cx="20" cy="18" r="20" fill="url(#glw)"/><path class="fl" d="M20 2c6 8 10 13 10 19a10 10 0 0 1-20 0c0-6 4-11 10-19z" fill="url(#flame)"/><path class="fl" d="M20 14c3 4 4 6 4 9a4 4 0 0 1-8 0c0-3 1-5 4-9z" fill="#e0343f" opacity=".8"/><path d="M20 26v8" stroke="#2a2a2a" stroke-width="2"/><rect class="body" x="11" y="33" width="18" height="58" rx="4"/><path d="M11 50l18-6M11 66l18-6M11 82l18-6" stroke="#4a6ee0" stroke-opacity=".5" stroke-width="3"/></svg>`;
+
+/* ---------- state ---------- */
+let mine={},sentJSON=null,db=null,user=null,room=null,uid=null,isOwner=false,votes=new Map(),step=-1,sending=false,firstSnap=true;
+const clean=r=>{const o={};if(r&&typeof r==="object")for(const k in r){const v=Number(r[k]);if(IDS.has(k)&&Number.isInteger(v)&&v>=1&&v<=5)o[k]=v}return o};
+try{mine=clean(JSON.parse(localStorage.getItem("sufg-mine")||"{}"));sentJSON=localStorage.getItem("sufg-sent")}catch(e){}
+const save=()=>{try{localStorage.setItem("sufg-mine",JSON.stringify(mine))}catch(e){}};
+
+/* ---------- phone views ---------- */
+const P=$("phone");
+function vIntro(){
+  if(sentJSON){step=ITEMS.length;mine=clean(JSON.parse(sentJSON));return vReview()}
+  P.innerHTML=`<div class="screenwrap"><img class="mascot" src="mascot.jpg" alt="A cool sufganiya in sunglasses lounging on a blue plate">
+  <h1 class="title">Stay Sweet This Hanukkah</h1><div class="kicker">RATE THE SUFGANIYOT</div>
+  <p class="lede">Light 1 to 5 candles for each sufganiya you taste, and skip the ones you didn't. The results go live on the big screen.</p>
+  <div><button class="cta" id="go">${Object.keys(mine).length?"Continue tasting":"Let's taste"}</button></div></div>`;
+  $("go").onclick=()=>{step=0;render()};
+}
+function vStep(){
+  const it=ITEMS[step],r=mine[it.id]||0;
+  P.innerHTML=`<div class="topbar"><button class="ghost" id="back" aria-label="Back">←</button><div class="dots">${ITEMS.map((x,i)=>`<i class="${i===step?"cur":mine[x.id]?"done":""}"></i>`).join("")}</div><span style="color:var(--mute);font-size:14px;width:44px;text-align:end">${step+1}/${ITEMS.length}</span></div>
+  <div class="step"><span class="tag ${it.kind==="Savory"?"sav":""}">${it.kind==="Sweet"?"Premium sweet":"Savory brioche"}</span>
+  <div class="hero-donut">${donut(it)}</div>
+  <h2 class="dname">${esc(it.name)}</h2><div class="dhe" dir="rtl" lang="he">${esc(it.he)}</div>
+  <div class="candles" role="radiogroup" aria-label="Rate ${esc(it.name)}">${[1,2,3,4,5].map(n=>`<button class="candle${r>=n?" on":""}" data-n="${n}" role="radio" aria-checked="${r===n}" aria-label="${n} candle${n>1?"s":""}">${candleSvg}</button>`).join("")}</div>
+  <div class="mood" id="mood">${r?MOODS[r]:"<span style='color:var(--mute);font-family:Rubik;font-size:16px'>Tap a candle to rate</span>"}</div></div>
+  <div class="nav"><button class="ghost" id="skip">Didn't try it</button><button class="cta" id="next" ${r?"":"disabled"}>${step<ITEMS.length-1?"Next":"Review & send"}</button></div>`;
+  $("back").onclick=()=>{step--;render()};
+  $("next").onclick=()=>{step++;render()};
+  $("skip").onclick=()=>{delete mine[it.id];save();step++;render()};
+  P.querySelectorAll(".candle").forEach(b=>b.onclick=()=>{
+    const n=+b.dataset.n;mine[it.id]=n;save();
+    P.querySelectorAll(".candle").forEach(c=>{const k=+c.dataset.n;c.classList.toggle("on",k<=n);c.setAttribute("aria-checked",k===n)});
+    const m=$("mood");m.textContent=MOODS[n];m.classList.remove("pop");void m.offsetWidth;m.classList.add("pop");
+    $("next").disabled=false;
+    P.querySelectorAll(".dots i")[step].className="cur";
+  });
+}
+function vReview(){
+  const n=Object.keys(mine).length,same=sentJSON===JSON.stringify(mine);
+  P.innerHTML=`<div class="topbar"><button class="ghost" id="back" aria-label="Back">←</button><span class="kicker" style="font-size:12px">YOUR SCORECARD</span><span style="width:44px"></span></div>
+  <div class="step" style="justify-content:flex-start;padding-top:10px"><h2 style="font-size:36px">${same&&n?"Toda! You're in":"Ready to send?"}</h2>
+  <p class="lede" style="margin-bottom:6px">${same&&n?"Your candles are lit. Watch the big screen for the grand reveal!":"Tap any sufganiya to change it."}</p>
+  <div class="review">${ITEMS.map((it,i)=>`<button class="rv" data-i="${i}">${donut(it)}<span><b>${esc(it.name)}</b><span>${mine[it.id]?MOODS[mine[it.id]]:"Didn't try"}</span></span><span class="minis">${[1,2,3,4,5].map(k=>`<i class="${(mine[it.id]||0)>=k?"on":""}"></i>`).join("")}</span></button>`).join("")}</div>
+  <div class="err" id="err"></div></div>
+  <div class="nav"><button class="cta" id="send" ${!n||same||sending?"disabled":""}>${same&&n?"Sent ✓":sentJSON?"Update my vote":`Send ${n} rating${n===1?"":"s"}`}</button></div>`;
+  $("back").onclick=()=>{step=ITEMS.length-1;render()};
+  if(same&&n){P.querySelectorAll(".rv").forEach(b=>{b.disabled=true;b.style.cursor="default"});$("back").hidden=true}
+  else P.querySelectorAll(".rv").forEach(b=>b.onclick=()=>{step=+b.dataset.i;render()});
+  $("send").onclick=send;
+}
+async function send(){
+  if(sending)return;sending=true;$("send").disabled=true;$("send").textContent="Sending…";
+  const r={...mine};let ok=false;
+  if(FORM_ACTION){
+    const body=new URLSearchParams();for(const k in r)if(ENTRY[k])body.append(ENTRY[k],String(r[k]));
+    try{await fetch(FORM_ACTION,{method:"POST",mode:"no-cors",body});ok=true}catch(e){}
+  }
+  sending=false;
+  if(ok){sentJSON=JSON.stringify(r);try{localStorage.setItem("sufg-sent",sentJSON)}catch(e){}render()}
+  else{vReview();$("err").textContent=FORM_ACTION?"Couldn't send. Check your connection and try again.":"Voting isn't set up yet."}
+}
+function render(){
+  if(location.hash==="#screen")return;
+  if(step<0)vIntro();else if(step>=ITEMS.length)vReview();else vStep();
+  window.scrollTo(0,0);
+}
+
+/* ---------- big screen ---------- */
+function ranked(){
+  /* Skips never count: each average uses only the people who tasted it.
+     Fair score = Bayesian average: a few votes lean toward the overall mean, so 1 perfect vote can't beat 20 great ones. */
+  const s={},c={};ITEMS.forEach(i=>{s[i.id]=0;c[i.id]=0});
+  let tot=0,num=0;
+  for(const r of votes.values())for(const k in r){s[k]+=r[k];c[k]++;tot+=r[k];num++}
+  const m=num?tot/num:0,C=2;
+  return ITEMS.map(i=>({...i,n:c[i.id],avg:c[i.id]?s[i.id]/c[i.id]:0,score:c[i.id]?(C*m+s[i.id])/(C+c[i.id]):0}))
+    .sort((a,b)=>b.score-a.score||b.n-a.n);
+}
+let phase="lobby",step2=0,lastN=0;
+function renderLobby(){
+  const n=votes.size,b=$("bigN");b.textContent=n;
+  if(n!==lastN){b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");lastN=n}
+  $("bigL").textContent=n===1?"guest has voted":"guests have voted";
+}
+function renderStage(){
+  $("nV").textContent=votes.size;
+  const lob=phase==="lobby";
+  $("lobby").hidden=!lob;$("results").hidden=lob;$("hcount").hidden=lob;
+  $("reveal").hidden=!lob;$("toLobby").hidden=lob;
+  if(lob){renderLobby();return}
+  if(!votes.size){$("podium").innerHTML=`<div class="empty" style="grid-column:1/-1"><p>No votes yet. Head back to the lobby.</p></div>`;$("rest").innerHTML="";return}
+  const t=ranked(),order=[1,0,2],need={0:3,1:2,2:1};
+  $("podium").innerHTML=order.map(i=>{const it=t[i];if(!it)return"<div></div>";
+    return `<div class="pod p${i+1}${step2>=need[i]?" show":""}">${donut(it,{shades:i===0,face:i===0,k:"p"})}<div class="nm">${esc(it.name)}</div><div class="sc">${it.n?it.score.toFixed(1):"–"}</div><div class="vn">${it.n} tasted · avg ${it.n?it.avg.toFixed(1):"–"}</div><div class="block">${i+1}</div></div>`}).join("");
+  $("rest").innerHTML=t.slice(3).map((it,i)=>`<div class="rt"><span class="rk">${i+4}</span>${donut(it,{k:"r"})}<b>${esc(it.name)}</b><span class="s">${it.n?it.score.toFixed(1):"–"}</span></div>`).join("");
+  $("rest").classList.toggle("show",step2>=4);
+}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function cdShow(txt,big){const t=$("cdT");$("cd").hidden=false;t.textContent=txt;t.className=(big?"big ":"")+"go";void t.offsetWidth}
+function confetti(){
+  const box=$("confetti"),cols=["#f6cd4c","#fff","#e0343f","#6f92ef","#f6cd4c"];let h="";
+  for(let i=0;i<170;i++)h+=`<i style="left:${Math.random()*100}vw;background:${cols[i%5]};--dx:${(Math.random()*30-15).toFixed(1)}vw;--r:${Math.round(Math.random()*1080)}deg;animation-duration:${(2.6+Math.random()*2.4).toFixed(2)}s;animation-delay:${(Math.random()*.7).toFixed(2)}s;width:${8+Math.random()*8|0}px"></i>`;
+  box.innerHTML=h;setTimeout(()=>box.innerHTML="",6000);
+}
+let revealing=false;
+async function reveal(){
+  if(revealing)return;
+  if(!votes.size){$("sStatus").textContent="No votes yet, so there's nothing to reveal.";return}
+  revealing=true;
+  for(const n of ["3","2","1"]){cdShow(n,true);await wait(950)}
+  $("cd").hidden=true;phase="results";step2=0;renderStage();
+  await wait(700);step2=1;renderStage();
+  await wait(2200);step2=2;renderStage();
+  await wait(2400);cdShow("And the Sufganiya of the Night is…");await wait(2600);$("cd").hidden=true;
+  step2=3;renderStage();confetti();
+  await wait(1800);step2=4;renderStage();
+  revealing=false;
+}
+function renderPay(){
+  const c=$("payCard");
+  if(PAY_URL&&/^https:\/\//.test(PAY_URL)){c.className="qrcard pay";c.innerHTML=`<h3>${esc(PAY_LABEL)}</h3><div class="qrbox">${qrSvg(PAY_URL)}</div><div class="u"><span><b>Donations for the starving students of Malal 9.</b><br>Sufganiyot don't pay for themselves 🍩</span></div>`}
+  else{c.className="qrcard pay ph";c.innerHTML=`<h3>Payment</h3><div>QR code coming soon</div>`}
+}
+$("qrVote").innerHTML=qrSvg(VOTE_URL);renderPay();
+let toastT;
+function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;t.style.animation="none";void t.offsetWidth;t.style.animation="";clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600)}
+
+/* ---------- routing ---------- */
+function route(){
+  const scr=location.hash==="#screen";
+  $("stage").hidden=!scr;P.hidden=scr;
+  if(scr)renderStage();else render();
+}
+addEventListener("hashchange",route);
+$("toVote").onclick=()=>{location.hash="#vote"};
+$("reveal").onclick=reveal;
+const fsBtn=$("fs");
+const inFs=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+const fsLabel=()=>{fsBtn.textContent=inFs()?"Exit full screen":"Full screen"};
+fsBtn.onclick=()=>{
+  try{
+    if(inFs()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return}
+    const el=document.documentElement,req=el.requestFullscreen||el.webkitRequestFullscreen;
+    const p=req&&req.call(el);
+    if(!req)throw 0;
+    if(p&&p.catch)p.catch(()=>{$("sStatus").textContent="Full screen was blocked here. Press F11 (Windows) or Ctrl+Cmd+F (Mac) instead."});
+  }catch(e){$("sStatus").textContent="Full screen was blocked here. Press F11 (Windows) or Ctrl+Cmd+F (Mac) instead."}
+};
+document.addEventListener("fullscreenchange",fsLabel);document.addEventListener("webkitfullscreenchange",fsLabel);
+$("toLobby").onclick=()=>{phase="lobby";step2=0;renderStage()};
+route();
+
+/* ---------- live: read the Google Sheet ---------- */
+function parseCSV(t){const rows=[];let row=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];
+  if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}
+  else if(c=='"')q=true;else if(c==","){row.push(f);f=""}else if(c=="\n"){row.push(f);rows.push(row);row=[];f=""}else if(c!="\r")f+=c}
+  if(f||row.length){row.push(f);rows.push(row)}return rows}
+const norm=x=>String(x).toLowerCase().replace(/[^a-z]/g,"");
+async function poll(){
+  if(!CSV_URL){$("sStatus").textContent="Setup needed: add the Google Sheet link.";return}
+  try{
+    const res=await fetch(CSV_URL+(CSV_URL.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});
+    if(!res.ok)throw 0;
+    const rows=parseCSV(await res.text());if(!rows.length)throw 0;
+    const head=rows[0].map(norm),col={};
+    ITEMS.forEach(it=>{const i=head.findIndex(h=>h&&h.startsWith(norm(it.name).slice(0,6)));if(i>=0)col[it.id]=i});
+    const next=new Map();
+    rows.slice(1).forEach((r,n)=>{const v={};for(const id in col)v[id]=r[col[id]];const c=clean(v);if(Object.keys(c).length)next.set("r"+n,c)});
+    const grew=next.size>votes.size&&!firstSnap;
+    votes=next;firstSnap=false;
+    $("sStatus").textContent="Live · fair score: skips don't count, and a few votes can't outrank many";
+    if(location.hash==="#screen"){renderStage();if(grew)toast("A new vote just landed!")}
+  }catch(e){$("sStatus").textContent="Can't reach the Google Sheet right now. Retrying…"}
+}
+poll();
+setInterval(()=>{if(location.hash==="#screen")poll()},5000);
+addEventListener("hashchange",()=>{if(location.hash==="#screen")poll()});
+}
+</script>
+</body>
+</html>

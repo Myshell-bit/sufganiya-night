@@ -480,6 +480,7 @@ function parseCSV(t){const rows=[];let row=[],f="",q=false;for(let i=0;i<t.lengt
   if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}
   else if(c=='"')q=true;else if(c==","){row.push(f);f=""}else if(c=="\n"){row.push(f);rows.push(row);row=[];f=""}else if(c!="\r")f+=c}
   if(f||row.length){row.push(f);rows.push(row)}return rows}
+let lowReads=0;
 const norm=x=>String(x).toLowerCase().replace(/[^a-z]/g,"");
 async function poll(){
   if(!CSV_URL){$("sStatus").textContent="Setup needed: add the Google Sheet link.";return}
@@ -491,6 +492,10 @@ async function poll(){
     ITEMS.forEach((it,k)=>{const i=head.findIndex(h=>h&&h.startsWith(norm(it.name).slice(0,6)));col[it.id]=i>=0?i:k+1});
     const next=new Map();
     rows.slice(1).forEach((r,n)=>{const v={};for(const id in col)v[id]=r[col[id]];const c=clean(v);if(Object.keys(c).length)next.set("r"+n,c)});
+    /* Google's published CSV sometimes serves a stale or empty copy. Never drop on one bad read:
+       accept fewer votes only after 4 reads in a row agree (~20 s), e.g. after rows were deleted to reset. */
+    if(!firstSnap&&next.size<votes.size){lowReads++;if(lowReads<4)return}
+    lowReads=0;
     const grew=next.size>votes.size&&!firstSnap;
     votes=next;firstSnap=false;
     $("sStatus").textContent="Live · fair score: skips don't count, and a few votes can't outrank many";

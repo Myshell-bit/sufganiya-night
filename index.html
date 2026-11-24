@@ -168,6 +168,18 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 #confetti i{position:absolute;top:-4vh;width:12px;height:18px;border-radius:3px;animation:fall linear forwards}
 @keyframes fall{to{transform:translate(var(--dx),112vh) rotate(var(--r))}}
 @media(max-width:900px){.lobby{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.center{grid-column:1/-1;order:-1}}
+.np{display:flex;align-items:center;gap:14px;max-width:min(460px,40vw);background:#ffffff14;border:1px solid var(--line);border-radius:22px;padding:10px 18px 10px 10px;backdrop-filter:blur(6px)}
+.np.off,.np.idle{padding:10px 18px}.np.off{background:none;border:0;padding:0}
+.np img{width:clamp(52px,4.4vw,76px);aspect-ratio:1;border-radius:12px;object-fit:cover;box-shadow:0 6px 18px #0006;flex:none}
+.np div{display:grid;min-width:0;line-height:1.2}
+.np small{display:flex;align-items:center;gap:8px;color:var(--gold);font-weight:700;font-size:clamp(11px,.85vw,14px);letter-spacing:.06em;text-transform:uppercase}
+.np b{font-size:clamp(15px,1.3vw,22px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.np .ar{color:var(--mute);font-size:clamp(13px,1vw,17px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:12px}
+.eq i{width:3px;background:var(--gold);border-radius:2px;animation:eq .9s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:-.3s}.eq i:nth-child(3){animation-delay:-.6s}
+.np.paused .eq i,.np.idle .eq i{animation:none;height:3px}
+@keyframes eq{0%,100%{height:3px}50%{height:12px}}
 .modal{position:fixed;inset:0;z-index:10;background:#000a;display:grid;place-items:center;padding:16px}
 .modal>div{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;max-width:360px;text-align:center}
 .modal .r{display:flex;gap:10px;justify-content:center;margin-top:16px}
@@ -189,6 +201,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 <section id="stage" class="stage" hidden>
   <div class="shead">
     <div><h1>Sufganiya of the Night</h1><div class="kicker">HAPPY HANUKKAH · LIVE</div></div>
+    <div class="np" id="np" hidden></div>
     <div class="count" id="hcount"><b id="nV">0</b><span>guests<br>voted</span></div>
   </div>
   <div id="lobby" class="lobby">
@@ -455,6 +468,7 @@ function renderStage(){
   const lob=phase==="lobby";
   $("lobby").hidden=!lob;$("results").hidden=lob;$("hcount").hidden=lob;
   $("reveal").hidden=!lob;$("toLobby").hidden=lob;
+  window.__spR&&window.__spR();
   if(lob){renderLobby();return}
   if(!votes.size){$("podium").innerHTML=`<div class="empty" style="grid-column:1/-1"><p>No votes yet. Head back to the lobby.</p></div>`;$("rest").innerHTML="";lastKey="";return}
   const t=ranked(),key=t.map(x=>x.id+x.score.toFixed(3)+x.n).join("|");
@@ -611,7 +625,7 @@ let revealing=false,shown=new Set(),lastKey="";
 async function reveal(){
   if(revealing)return;
   if(!votes.size){$("sStatus").textContent="No votes yet, so there's nothing to reveal.";return}
-  revealing=true;ac();shown=new Set();lastKey="";
+  revealing=true;ac();shown=new Set();lastKey="";window.__spR&&window.__spR();window.__spP&&window.__spP();
   for(const n of ["3","2","1"]){cdShow(n,true);SFX.beep(n==="1");await wait(1000)}
   $("cd").hidden=true;phase="results";step2=0;renderStage();
   await wait(300);step2=.5;applyStep();SFX.whoosh();
@@ -626,6 +640,7 @@ async function reveal(){
   const w=$("win");w.classList.add("out");await wait(800);w.hidden=true;
   step2=4;applyStep();confetti(50);
   revealing=false;
+  setTimeout(()=>window.__spS&&window.__spS(),4000);
 }
 function renderPay(){
   const c=$("payCard");
@@ -699,6 +714,71 @@ async function poll(){
 poll();
 setInterval(()=>{if(location.hash==="#screen")poll()},5000);
 addEventListener("hashchange",()=>{if(location.hash==="#screen")poll()});
+/* ---------- Spotify "now playing" (lobby only) ---------- */
+const SP_ID="e709677e767441f19fcac72c370842ab";
+const SP_REDIRECT="https://myshell-bit.github.io/sufganiya-night/";
+const SP_SCOPES="user-read-currently-playing user-read-playback-state user-modify-playback-state";
+const sp={get tok(){try{return JSON.parse(localStorage.getItem("sufg-sp")||"null")}catch(e){return null}},
+          set tok(v){try{v?localStorage.setItem("sufg-sp",JSON.stringify(v)):localStorage.removeItem("sufg-sp")}catch(e){}}};
+const b64url=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+async function spConnect(){
+  const ver=b64url(crypto.getRandomValues(new Uint8Array(48)));
+  try{localStorage.setItem("sufg-sp-ver",ver)}catch(e){}
+  const ch=b64url(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(ver)));
+  location.href="https://accounts.spotify.com/authorize?"+new URLSearchParams({response_type:"code",client_id:SP_ID,scope:SP_SCOPES,redirect_uri:SP_REDIRECT,code_challenge_method:"S256",code_challenge:ch});
+}
+async function spToken(body){
+  const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:SP_ID,...body})});
+  if(!r.ok)throw new Error("token "+r.status);
+  const j=await r.json(),old=sp.tok||{};
+  sp.tok={access:j.access_token,refresh:j.refresh_token||old.refresh,exp:Date.now()+(j.expires_in-60)*1000};
+}
+async function spFetch(path,opt={}){
+  let t=sp.tok;if(!t)return null;
+  if(Date.now()>t.exp){try{await spToken({grant_type:"refresh_token",refresh_token:t.refresh})}catch(e){sp.tok=null;spRender();return null}t=sp.tok}
+  const r=await fetch("https://api.spotify.com/v1"+path,{...opt,headers:{Authorization:"Bearer "+t.access}});
+  if(r.status===401){t.exp=0;sp.tok=t;return null}
+  return r;
+}
+let spNow=null,spWasPlaying=false;
+function spRender(){
+  const el=$("np");if(!el)return;
+  const show=location.hash==="#screen"&&phase==="lobby"&&!revealing;
+  el.hidden=!show;if(!show)return;
+  if(!sp.tok){el.className="np off";el.innerHTML=`<button class="ghost" id="spGo">Connect Spotify</button>`;$("spGo").onclick=spConnect;return}
+  if(!spNow){el.className="np idle";el.innerHTML=`<div class="eq"><i></i><i></i><i></i></div><div><small>Now playing</small><b>Nothing playing on Spotify</b></div>`;return}
+  el.className="np"+(spNow.playing?"":" paused");
+  el.innerHTML=`${spNow.art?`<img alt="" src="${esc(spNow.art)}">`:""}<div><small><span class="eq"><i></i><i></i><i></i></span>${spNow.playing?"Now playing":"Paused"}</small><b></b><span class="ar"></span></div>`;
+  el.querySelector("b").textContent=spNow.title;el.querySelector(".ar").textContent=spNow.artist;
+}
+async function spPoll(){
+  if(location.hash!=="#screen"||!sp.tok){spRender();return}
+  try{
+    const r=await spFetch("/me/player/currently-playing");
+    if(r&&r.status===200){const j=await r.json(),it=j.item;
+      if(it){const imgs=(it.album&&it.album.images)||it.images||[],img=imgs.length?imgs[Math.min(1,imgs.length-1)].url:"";
+        spNow={title:it.name,artist:(it.artists||[]).map(a=>a.name).join(", ")||(it.show&&it.show.name)||"",art:/^https:\/\//.test(img)?img:"",playing:!!j.is_playing}}
+      else spNow=null}
+    else if(r&&r.status===204)spNow=null;
+  }catch(e){}
+  spRender();
+}
+async function spPauseForReveal(){
+  if(!sp.tok)return;spWasPlaying=!!(spNow&&spNow.playing);
+  if(spWasPlaying)try{await spFetch("/me/player/pause",{method:"PUT"})}catch(e){}
+}
+async function spResume(){if(spWasPlaying)try{await spFetch("/me/player/play",{method:"PUT"});spWasPlaying=false}catch(e){}}
+window.__spR=spRender;window.__spP=spPauseForReveal;window.__spS=spResume;
+/* coming back from Spotify's login page */
+(async()=>{
+  const q=new URLSearchParams(location.search);
+  if(q.get("code")||q.get("error")){
+    const code=q.get("code");let ver=null;try{ver=localStorage.getItem("sufg-sp-ver")}catch(e){}
+    history.replaceState(null,"",SP_REDIRECT+"#screen");route();
+    if(code&&ver){try{await spToken({grant_type:"authorization_code",code,redirect_uri:SP_REDIRECT,code_verifier:ver})}catch(e){$("sStatus").textContent="Spotify didn't connect. Try again."}}
+  }
+  spPoll();setInterval(spPoll,5000);addEventListener("hashchange",spRender);
+})();
 }
 </script>
 </body>

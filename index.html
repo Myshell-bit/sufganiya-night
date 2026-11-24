@@ -595,8 +595,8 @@ function confetti(n=90){
   const box=$("confetti"),cols=["#f6cd4c","#fff","#e0343f","#6f92ef","#f6cd4c","#fbe08a"];let h="";
   for(const side of ["l","r"])for(let i=0;i<n;i++){
     const c=cols[(i+(side=="r"?3:0))%cols.length],w=7+Math.random()*9|0,round=i%5===0,
-      x=(18+Math.random()*52)*(side=="l"?1:-1),y=-(45+Math.random()*50),drift=(Math.random()*16-8);
-    h+=`<i class="cn ${side}" style="background:${c};width:${w}px;height:${round?w:w*1.6|0}px;border-radius:${round?"50%":"2px"};--x:${x.toFixed(1)}vw;--y:${y.toFixed(1)}vh;--x2:${(x*1.25+drift).toFixed(1)}vw;--r:${Math.round(360+Math.random()*1080)}deg;animation-duration:${(3.6+Math.random()*2.4).toFixed(2)}s;animation-delay:${(Math.random()*.18).toFixed(2)}s"></i>`}
+      x=(6+Math.random()*26)*(side=="l"?1:-1),y=-(55+Math.random()*42),drift=(Math.random()*6-4)*(side=="l"?1:-1);
+    h+=`<i class="cn ${side}" style="background:${c};width:${w}px;height:${round?w:w*1.6|0}px;border-radius:${round?"50%":"2px"};--x:${x.toFixed(1)}vw;--y:${y.toFixed(1)}vh;--x2:${(x*1.1+drift).toFixed(1)}vw;--r:${Math.round(360+Math.random()*1080)}deg;animation-duration:${(3.6+Math.random()*2.4).toFixed(2)}s;animation-delay:${(Math.random()*.18).toFixed(2)}s"></i>`}
   const wrap=document.createElement("div");wrap.innerHTML=h;box.appendChild(wrap);setTimeout(()=>wrap.remove(),7000);
   SFX.confetti();
 }

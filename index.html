@@ -250,12 +250,14 @@ const ITEMS=[
   {id:"pav",name:"Pavlova",he:"פבלובה",kind:"Sweet"},
   {id:"onion",name:"Onion Jam & Parmesan",he:"ריבת בצל ופרמזן",kind:"Savory"},
   {id:"tom",name:"Tomato & Chili Honey",he:"עגבניות ודבש צ'ילי",kind:"Savory"},
-  {id:"feta",name:"Feta & Nigella",he:"פטה וקצח",kind:"Savory"}
+  {id:"feta",name:"Feta & Nigella",he:"פטה וקצח",kind:"Savory"},
+  {id:"classic",name:"Classic Jam",he:"ריבה קלאסית",kind:"Sweet",tag:"The classics"},
+  {id:"dulce",name:"Dulce de Leche",he:"ריבת חלב",kind:"Sweet",tag:"The classics"}
 ];
 /* ===== SETUP: paste your Google Form + Sheet details here ===== */
 const VOTE_URL="https://myshell-bit.github.io/sufganiya-night/";
 const FORM_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSfJ6E0G447ci9xU6_kJldJnbhInfXAKPP1DtVpSUmDR91k6MQ/formResponse";   /* https://docs.google.com/forms/d/e/<FORM_ID>/formResponse */
-const ENTRY={tira:"entry.561765429",mango:"entry.1680631452",pist:"entry.1908150076",pav:"entry.1756565395",onion:"entry.1649684913",tom:"entry.143714153",feta:"entry.1851281991"};  /* entry.123456 ids from the pre-filled link */
+const ENTRY={classic:"",dulce:"",tira:"entry.561765429",mango:"entry.1680631452",pist:"entry.1908150076",pav:"entry.1756565395",onion:"entry.1649684913",tom:"entry.143714153",feta:"entry.1851281991"};  /* entry.123456 ids from the pre-filled link */
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSvM4CVlDkPTu3jGqP4Glr5OVXnli7EdySrd_Zdf5T32G8txmSYEDRa2XgIJMX2xlj-nnuJhSGbvKYX/pub?gid=662577819&single=true&output=csv";       /* File > Share > Publish to web > CSV link of the responses sheet */
 /* ================================================================= */
 const PAY_URL="https://links.payboxapp.com/AKwvhI9dk8b";            /* paste the payment link here */
@@ -305,6 +307,8 @@ function qrSvg(text,dark="#0b1d6b"){const M=makeQR(text),n=M.length,q=3;let d=""
 
 
 const MOODS=["","Meh","Not bad","Tasty","So good!","A great miracle!"];
+/* a sufganiya appears only once its form question is connected */
+for(let i=ITEMS.length-1;i>=0;i--)if(!ENTRY[ITEMS[i].id])ITEMS.splice(i,1);
 const IDS=new Set(ITEMS.map(i=>i.id));
 const $=s=>document.getElementById(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -320,7 +324,23 @@ $("sky").innerHTML=[[70,80,24],[930,120,30],[150,470,14],[890,560,20],[50,860,22
 function rng(seed){let h=2166136261;for(const c of seed)h=Math.imul(h^c.charCodeAt(0),16777619);return()=>{h^=h<<13;h^=h>>>17;h^=h<<5;return((h>>>0)%10000)/10000}}
 function scatter(seed,n,x0,x1,y0,y1,fn){const r=rng(seed);let o="";for(let i=0;i<n;i++){const x=x0+r()*(x1-x0),y=y0+r()*(y1-y0),a=Math.round(r()*180),k=r();o+=fn(x.toFixed(1),y.toFixed(1),a,k)}return o}
 const GL={tira:["#ffffff","#f3eee8","#d8cfc6"],mango:["#fdeaa4","#f3cf5c","#d6a42e"],pist:["#c3d27a","#9cb04c","#6f852c"],pav:["#ffffff","#f9eef1","#e3cdd4"]};
+const inDome=(x,y)=>((x-100)/74)**2+((y-114)/70)**2<1;
 const TOP={
+  classic:()=>scatter("c",230,26,174,42,124,(x,y,a,k)=>inDome(+x,+y)&&+y<118-k*20?`<circle cx="${x}" cy="${y}" r="${(.7+k*1.6).toFixed(1)}" fill="#fff" opacity="${(.55+k*.45).toFixed(2)}"/>`:"")
+    +`<path d="M30 112c18-34 52-60 70-62s60 22 70 62c-20-6-38-18-70-18s-52 12-70 18z" fill="#fff" opacity=".28"/>
+    <ellipse cx="100" cy="52" rx="20" ry="6" fill="#5a0010" opacity=".25"/>
+    <path d="M82 50c-1-15 8-24 18-24s19 9 18 24c-7 7-29 7-36 0z" fill="#c8102e"/><path d="M100 26c-2 4-3 8-1 10" stroke="#c8102e" stroke-width="5" stroke-linecap="round"/>
+    <path d="M89 40c3-6 8-8 13-7" stroke="#ff6b7f" stroke-width="3.5" fill="none" stroke-linecap="round"/><circle cx="111" cy="41" r="2" fill="#ff8a99"/>
+    <path d="M52 120c7-4 15-4 18 2 1 5-3 7-4 13-1 6-7 6-7 0 0-6-4-9-7-15z" fill="#c8102e"/><path d="M57 121c3-1 6-1 8 1" stroke="#ff6b7f" stroke-width="2" fill="none"/>`,
+  dulce:()=>scatter("d",90,30,170,44,120,(x,y,a,k)=>inDome(+x,+y)?`<circle cx="${x}" cy="${y}" r="${(.6+k*1.2).toFixed(1)}" fill="#fff" opacity="${(.35+k*.4).toFixed(2)}"/>`:"")
+    +`<path d="M44 92c10-9 17 5 27-3s17 6 28-2 17 6 28-2 15 6 25 0" stroke="#7a3f12" stroke-opacity=".35" stroke-width="5" fill="none" stroke-linecap="round" transform="translate(0 2)"/>
+    <path d="M44 92c10-9 17 5 27-3s17 6 28-2 17 6 28-2 15 6 25 0" stroke="#b5671f" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <path d="M48 89c8-6 14 3 22-1" stroke="#e8a85c" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <ellipse cx="100" cy="58" rx="28" ry="7" fill="#4a2208" opacity=".25"/>
+    <path d="M72 56c-3-18 12-28 28-28s31 10 28 28c-12 9-44 9-56 0z" fill="#b06a26"/>
+    <path d="M80 50c6-12 30-14 40-2M86 44c6-6 18-6 24 0" stroke="#d99550" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M100 28c-3 4-3 8 0 10" stroke="#b06a26" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="88" cy="40" rx="6" ry="3" fill="#fff" opacity=".4" transform="rotate(-25 88 40)"/>`,
   tira:()=>scatter("t",70,46,154,48,100,(x,y,a,k)=>`<circle cx="${x}" cy="${y}" r="${(.6+k*1.1).toFixed(1)}" fill="#5a2e18" opacity="${(.25+k*.4).toFixed(2)}"/>`)
     +`<ellipse cx="102" cy="64" rx="44" ry="8" fill="#2a1408" opacity=".18"/>
     <path d="M58 66L74 18l24 42z" fill="#3b1d10"/><path d="M74 18l-8 46" stroke="#6e3e27" stroke-width="2.5"/><path d="M74 18l24 42" stroke="#24110a" stroke-width="1.5"/>
@@ -399,7 +419,7 @@ function vIntro(){
 function vStep(){
   const it=ITEMS[step],r=mine[it.id]||0;
   P.innerHTML=`<div class="topbar"><button class="ghost" id="back" aria-label="Back">←</button><div class="dots">${ITEMS.map((x,i)=>`<i class="${i===step?"cur":mine[x.id]?"done":""}"></i>`).join("")}</div><span style="color:var(--mute);font-size:14px;width:44px;text-align:end">${step+1}/${ITEMS.length}</span></div>
-  <div class="step"><span class="tag ${it.kind==="Savory"?"sav":""}">${it.kind==="Sweet"?"Premium sweet":"Savory brioche"}</span>
+  <div class="step"><span class="tag ${it.kind==="Savory"?"sav":""}">${it.tag||(it.kind==="Sweet"?"Premium sweet":"Savory brioche")}</span>
   <div class="hero-donut">${donut(it)}</div>
   <h2 class="dname">${esc(it.name)}</h2><div class="dhe" dir="rtl" lang="he">${esc(it.he)}</div>
   <div class="candles" role="radiogroup" aria-label="Rate ${esc(it.name)}">${[1,2,3,4,5].map(n=>`<button class="candle${r>=n?" on":""}" data-n="${n}" role="radio" aria-checked="${r===n}" aria-label="${n} candle${n>1?"s":""}">${candleSvg}</button>`).join("")}</div>

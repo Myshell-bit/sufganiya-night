@@ -685,9 +685,21 @@ function burstAt(x,y,cols,n=46){
 }
 async function placeMoment(place,step){
   const pod=document.querySelector(".pod.p"+place),sp=$("spot");
-  if(pod){const r=pod.getBoundingClientRect();sp.style.setProperty("--sx",(r.left+r.width/2)+"px");sp.style.setProperty("--sy",(r.top+r.height*.55)+"px")}
+  const at=pl=>{const e=document.querySelector(".pod.p"+pl);if(!e)return null;const r=e.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height*.55]};
+  const set=([x,y])=>{sp.style.setProperty("--sx",x+"px");sp.style.setProperty("--sy",y+"px")};
+  /* the spotlight searches the podium, slowing down like a roulette wheel, then lands */
+  const order=[1,2,3].filter(Boolean),seq=[];let last=place;
+  for(let k=0;k<6;k++){let n;do{n=order[Math.random()*order.length|0]}while(n===last);seq.push(n);last=n}
+  if(seq[seq.length-1]===place)seq.pop();seq.push(place);
+  const pts=seq.map(at).filter(Boolean),durs=[150,170,200,240,290,360,450].slice(-pts.length);
+  let cur=pts.length?[pts[0][0],-200]:[innerWidth/2,innerHeight/2];set(cur);
   sp.classList.add("on");SFX.mini(1.6);
-  await wait(1650);step2=step;applyStep();
+  for(let k=0;k<pts.length;k++){const from=cur,to=pts[k],d=durs[k]||300,t0=performance.now();
+    await new Promise(res=>{const f=now=>{const q=Math.min(1,(now-t0)/d),e=q<.5?2*q*q:1-(-2*q+2)**2/2;
+      set([from[0]+(to[0]-from[0])*e,from[1]+(to[1]-from[1])*e]);q<1?requestAnimationFrame(f):res()};requestAnimationFrame(f)});
+    cur=to}
+  await wait(Math.max(0,1650-durs.slice(0,pts.length).reduce((a,b)=>a+b,0)));
+  step2=step;applyStep();
   setTimeout(()=>{SFX.pop(place===2);
     if(pod){const r=pod.getBoundingClientRect(),cols=place===3?["#f6c79b","#c98454","#fff","#f6cd4c"]:["#fff","#dfe6fb","#b9c6ee","#f6cd4c"];burstAt(r.left+r.width/2,r.top+r.height*.4,cols)}},480);
   await wait(2800);sp.classList.remove("on");

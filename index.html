@@ -145,6 +145,21 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .pod.show .pl{opacity:1;animation:plpop .6s .6s cubic-bezier(.3,1.7,.5,1) both}.pod.static .pl{animation:none}
 @keyframes plpop{from{transform:scale(0) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
 .pod.show:not(.static)>svg.d{filter:drop-shadow(0 0 28px #f6cd4c99)}
+.nm-in{display:grid;gap:6px;text-align:start;max-width:340px;width:100%;margin:0 auto}
+.nm-in span{font-weight:700}.nm-in small{font-weight:400;color:var(--mute)}
+.nm-in input{font:inherit;font-size:17px;min-height:50px;border-radius:14px;border:1px solid var(--line);background:#ffffff14;color:#fff;padding:0 16px}
+.nm-in input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.statsv{position:fixed;inset:0;z-index:6;overflow:auto;padding:clamp(18px,3vw,48px) clamp(16px,4vw,72px);background:radial-gradient(110% 70% at 50% 8%,#1d3fb8 0%,var(--bg) 42%,var(--deep) 100%)}
+.statsv h1{font-size:clamp(38px,5vw,84px)}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(12px,1.6vw,24px);margin-top:clamp(16px,3vh,36px)}
+.sc2{background:#ffffff10;border:1px solid var(--line);border-radius:24px;padding:clamp(16px,1.6vw,26px);display:grid;gap:4px;align-content:start;animation:cardIn .7s cubic-bezier(.3,1.5,.5,1) both}
+.sc2 .ic{font-size:clamp(30px,2.6vw,46px);line-height:1}
+.sc2 .st{color:var(--gold);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:clamp(12px,.95vw,16px);margin-top:4px}
+.sc2 .sb{font-family:"DM Serif Display",serif;font-size:clamp(28px,2.8vw,52px);line-height:1.05;overflow-wrap:anywhere}
+.sc2 .ss{color:var(--mute);font-size:clamp(14px,1.05vw,18px)}
+.sc2 .sd svg{width:clamp(90px,8vw,140px)}
+.vs{height:12px;border-radius:99px;background:#fff;overflow:hidden;margin-top:8px}.vs i{display:block;height:100%;background:var(--gold)}
+@keyframes cardIn{from{opacity:0;transform:translateY(40px) scale(.85)}to{opacity:1;transform:none}}
 .win{position:fixed;inset:0;z-index:8;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 45%,#2a4fd0,#0a1c66 55%,#050d33);transition:opacity .8s}
 .win.out{opacity:0}
 .win .rays{position:absolute;left:50%;top:45%;width:240vmax;height:240vmax;margin:-120vmax 0 0 -120vmax;background:repeating-conic-gradient(#f6cd4c30 0 7deg,transparent 7deg 18deg);-webkit-mask:radial-gradient(circle,#000 8%,transparent 55%);mask:radial-gradient(circle,#000 8%,transparent 55%);animation:spin 24s linear infinite}
@@ -235,6 +250,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
       <button class="ghost" id="snd">Sound: on</button>
       <button class="ghost" id="fs">Full screen</button>
       <button class="ghost" id="toVote">Voting view</button>
+      <button class="cta" id="statsBtn" hidden>Fun stats ✨</button>
       <button class="ghost" id="toLobby" hidden>Back to lobby</button>
       <button class="ghost" id="reset">Reset votes</button>
       <button class="ghost" id="unreset" hidden>Show earlier votes</button>
@@ -246,6 +262,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 <div id="cd" class="cd" hidden><div class="beam b1"></div><div class="beam b2"></div><div class="ring" id="ring"></div><div id="cdT"></div></div>
 <div id="win" class="win" hidden></div>
 <div id="spot" aria-hidden="true"></div>
+<section id="stats" class="statsv" hidden><div class="shead"><div><h1>Tonight in Numbers</h1><div class="kicker">SUFGANIYA NIGHT · FUN STATS</div></div><button class="ghost" id="statsBack">Back to podium</button></div><div id="statGrid" class="sgrid"></div></section>
 <div id="confetti" aria-hidden="true"></div>
 <div id="toast" class="toast" hidden></div>
 <div class="modal" id="confirm" hidden><div>
@@ -273,6 +290,7 @@ const ITEMS=[
 const VOTE_URL="https://myshell-bit.github.io/sufganiya-night/";
 const FORM_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSfJ6E0G447ci9xU6_kJldJnbhInfXAKPP1DtVpSUmDR91k6MQ/formResponse";   /* https://docs.google.com/forms/d/e/<FORM_ID>/formResponse */
 const ENTRY={classic:"",dulce:"",sfenj:"",eshel:"",tira:"entry.561765429",mango:"entry.1680631452",pist:"entry.1908150076",pav:"entry.1756565395",onion:"entry.1649684913",tom:"entry.143714153",feta:"entry.1851281991"};  /* entry.123456 ids from the pre-filled link */
+const NAME_ENTRY="";    /* entry id of the optional "Name" question */
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSvM4CVlDkPTu3jGqP4Glr5OVXnli7EdySrd_Zdf5T32G8txmSYEDRa2XgIJMX2xlj-nnuJhSGbvKYX/pub?gid=662577819&single=true&output=csv";       /* File > Share > Publish to web > CSV link of the responses sheet */
 /* ================================================================= */
 const PAY_URL="https://links.payboxapp.com/AKwvhI9dk8b";            /* paste the payment link here */
@@ -449,7 +467,9 @@ function vIntro(){
   P.innerHTML=`<div class="screenwrap"><img class="mascot" src="mascot.jpg" alt="A cool sufganiya in sunglasses lounging on a blue plate">
   <h1 class="title">Stay Sweet This Hanukkah</h1><div class="kicker">RATE THE SUFGANIYOT</div>
   <p class="lede">Light 1 to 5 candles for each sufganiya you taste, and skip the ones you didn't. The results go live on the big screen.</p>
+  ${NAME_ENTRY?`<label class="nm-in"><span>Your name <small>(optional, for the fun stats!)</small></span><input id="myName" maxlength="30" autocomplete="given-name" placeholder="e.g. Noa"></label>`:""}
   <div><button class="cta" id="go">${Object.keys(mine).length?"Continue tasting":"Let's taste"}</button></div></div>`;
+  if(NAME_ENTRY){const n=$("myName");try{n.value=localStorage.getItem("sufg-name")||""}catch(e){}n.oninput=()=>{try{localStorage.setItem("sufg-name",n.value.trim())}catch(e){}}}
   $("go").onclick=()=>{step=0;render()};
 }
 function vStep(){
@@ -490,6 +510,7 @@ async function send(){
   const r={...mine};let ok=false;
   if(FORM_ACTION){
     const body=new URLSearchParams();for(const k in r)if(ENTRY[k])body.append(ENTRY[k],String(r[k]));
+    let nm="";try{nm=(localStorage.getItem("sufg-name")||"").trim().slice(0,30)}catch(e){}if(NAME_ENTRY&&nm)body.append(NAME_ENTRY,nm);
     try{await fetch(FORM_ACTION,{method:"POST",mode:"no-cors",body});ok=true}catch(e){}
   }
   sending=false;
@@ -523,7 +544,7 @@ function renderStage(){
   $("nV").textContent=votes.size;
   const lob=phase==="lobby";
   $("lobby").hidden=!lob;$("results").hidden=lob;$("hcount").hidden=lob;
-  $("reveal").hidden=!lob;$("toLobby").hidden=lob;
+  $("reveal").hidden=!lob;$("toLobby").hidden=lob;$("statsBtn").hidden=lob||step2<4||!votes.size;
   window.__spR&&window.__spR();
   if(lob){renderLobby();return}
   if(!votes.size){$("podium").innerHTML=`<div class="empty" style="grid-column:1/-1"><p>No votes yet. Head back to the lobby.</p></div>`;$("rest").innerHTML="";lastKey="";return}
@@ -732,10 +753,40 @@ async function reveal(){
   await wait(7000);
   step2=3;shown.add(1);applyStep();
   const w=$("win");w.classList.add("out");await wait(800);w.hidden=true;
-  step2=4;applyStep();confetti(50);
+  step2=4;applyStep();confetti(50);$("statsBtn").hidden=false;
   revealing=false;
   setTimeout(()=>window.__spS&&window.__spS(),4000);
 }
+/* ---------- fun stats ---------- */
+function computeStats(){
+  const rows=[...votes.entries()].map(([id,r])=>({r,name:(voteNames.get(id)||"").trim()}));
+  const all=rows.flatMap(x=>Object.values(x.r));
+  const candles=all.reduce((a,b)=>a+b,0);
+  const people=rows.filter(x=>x.name&&Object.keys(x.r).length>=2).map(x=>{const v=Object.values(x.r);return{name:x.name,avg:v.reduce((a,b)=>a+b,0)/v.length,n:v.length}});
+  const pick=(arr,key,dir)=>{if(!arr.length)return null;const best=dir>0?Math.max(...arr.map(key)):Math.min(...arr.map(key));const w=arr.filter(x=>Math.abs(key(x)-best)<1e-9);return{names:w.slice(0,2).map(x=>x.name).join(" & ")+(w.length>2?` +${w.length-2}`:""),val:best}};
+  const critic=pick(people,x=>x.avg,-1),sweet=pick(people,x=>x.avg,1),explorer=pick(people,x=>x.n,1);
+  const per=ITEMS.map(it=>{const v=rows.map(x=>x.r[it.id]).filter(Boolean),m=v.length?v.reduce((a,b)=>a+b,0)/v.length:0;
+    return{it,n:v.length,fives:v.filter(x=>x===5).length,sd:v.length>1?Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/v.length):0}});
+  const contro=per.filter(x=>x.n>=2).sort((a,b)=>b.sd-a.sd)[0],darling=per.filter(x=>x.fives).sort((a,b)=>b.fives-a.fives)[0];
+  const team=k=>{const v=rows.flatMap(x=>ITEMS.filter(i=>(k==="Savory")===(i.kind==="Savory")).map(i=>x.r[i.id]).filter(Boolean));return v.length?v.reduce((a,b)=>a+b,0)/v.length:0};
+  return{candles,critic,sweet,explorer,contro,darling,sweetAvg:team("Sweet"),savAvg:team("Savory"),voters:rows.length};
+}
+function renderStats(){
+  const S=computeStats(),cards=[];
+  cards.push({ic:"🕯️",t:"Candles lit tonight",big:String(S.candles),sub:`by ${S.voters} guest${S.voters===1?"":"s"}`});
+  if(S.critic)cards.push({ic:"🧐",t:"Toughest Critic",big:S.critic.names,sub:`gave an average of ${S.critic.val.toFixed(1)} candles`});
+  if(S.sweet)cards.push({ic:"🥰",t:"Biggest Sweetheart",big:S.sweet.names,sub:`gave an average of ${S.sweet.val.toFixed(1)} candles`});
+  if(S.explorer)cards.push({ic:"🧭",t:"Sufganiya Explorer",big:S.explorer.names,sub:`tasted ${S.explorer.val} sufganiyot`});
+  if(S.contro&&S.contro.sd>0)cards.push({ic:"🔥",t:"Most Controversial",big:S.contro.it.name,sub:"people loved it… or really didn't",d:S.contro.it});
+  if(S.darling)cards.push({ic:"💛",t:"Crowd's Darling",big:S.darling.it.name,sub:`${S.darling.fives} perfect 5-candle rating${S.darling.fives===1?"":"s"}`,d:S.darling.it});
+  if(S.sweetAvg&&S.savAvg){const w=S.sweetAvg>=S.savAvg?"Sweet":"Savory";cards.push({ic:w==="Sweet"?"🍬":"🧀",t:"Sweet vs Savory",big:`Team ${w} wins!`,sub:`sweet ${S.sweetAvg.toFixed(1)} · savory ${S.savAvg.toFixed(1)}`,vs:[S.sweetAvg,S.savAvg]})}
+  $("statGrid").innerHTML=cards.map((c,i)=>`<div class="sc2" style="animation-delay:${(i*.55).toFixed(2)}s">
+    <div class="ic">${c.ic}</div><div class="st">${esc(c.t)}</div>${c.d?`<div class="sd">${donut(c.d,{k:"st"+i})}</div>`:""}
+    <div class="sb">${esc(c.big)}</div><div class="ss">${esc(c.sub)}</div>
+    ${c.vs?`<div class="vs"><i style="width:${(c.vs[0]/(c.vs[0]+c.vs[1])*100).toFixed(1)}%"></i></div>`:""}</div>`).join("");
+  cards.forEach((c,i)=>setTimeout(()=>SFX.pop(false),300+i*550));
+}
+function showStats(on){const el=$("stats");el.hidden=!on;if(on){renderStats();confetti(40)}}
 function renderPay(){
   const c=$("payCard");
   if(PAY_URL&&/^https:\/\//.test(PAY_URL)){c.className="qrcard pay";c.innerHTML=`<h3>${esc(PAY_LABEL)}</h3><div class="qrbox">${qrSvg(PAY_URL)}</div><div class="u"><span><b>Donations for the starving students of Malal 9.</b><br>Sufganiyot don't pay for themselves 🍩</span></div>`}
@@ -754,6 +805,7 @@ function route(){
 addEventListener("hashchange",route);
 $("toVote").onclick=()=>{location.hash="#vote"};
 $("reveal").onclick=reveal;
+$("statsBtn").onclick=()=>showStats(true);$("statsBack").onclick=()=>showStats(false);
 const fsBtn=$("fs");
 const inFs=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 const fsLabel=()=>{fsBtn.textContent=inFs()?"Exit full screen":"Full screen"};
@@ -775,7 +827,7 @@ function parseCSV(t){const rows=[];let row=[],f="",q=false;for(let i=0;i<t.lengt
   if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}
   else if(c=='"')q=true;else if(c==","){row.push(f);f=""}else if(c=="\n"){row.push(f);rows.push(row);row=[];f=""}else if(c!="\r")f+=c}
   if(f||row.length){row.push(f);rows.push(row)}return rows}
-let lowReads=0,lastTotal=0,skip=0;
+let voteNames=new Map(),lowReads=0,lastTotal=0,skip=0;
 try{skip=+localStorage.getItem("sufg-skip")||0}catch(e){}
 const setSkip=v=>{skip=v;try{localStorage.setItem("sufg-skip",String(v))}catch(e){};votes=new Map();firstSnap=true;lowReads=0;renderStage();poll()};
 $("reset").onclick=()=>{$("confirm").hidden=false};
@@ -794,13 +846,14 @@ async function poll(){
     const next=new Map();
     lastTotal=rows.length-1;
     $("unreset").hidden=!skip;
-    rows.slice(1+Math.min(skip,rows.length-1)).forEach((r,n)=>{const v={};for(const id in col)v[id]=r[col[id]];const c=clean(v);if(Object.keys(c).length)next.set("r"+n,c)});
+    const nameCol=head.findIndex(h=>h==='name'||h.startsWith('yourname')),names=new Map();
+    rows.slice(1+Math.min(skip,rows.length-1)).forEach((r,n)=>{const v={};for(const id in col)v[id]=r[col[id]];const c=clean(v);if(Object.keys(c).length){next.set("r"+n,c);if(nameCol>=0&&r[nameCol])names.set("r"+n,r[nameCol].slice(0,30))}});
     /* Google's published CSV sometimes serves a stale or empty copy. Never drop on one bad read:
        accept fewer votes only after 4 reads in a row agree (~20 s), e.g. after rows were deleted to reset. */
     if(!firstSnap&&next.size<votes.size){lowReads++;if(lowReads<4)return}
     lowReads=0;
     const grew=next.size>votes.size&&!firstSnap;
-    votes=next;firstSnap=false;
+    votes=next;voteNames=names;firstSnap=false;
     $("sStatus").textContent="Live · fair score: skips don't count, and a few votes can't outrank many";
     if(location.hash==="#screen"){renderStage();if(grew)toast("A new vote just landed!")}
   }catch(e){$("sStatus").textContent="Can't reach the Google Sheet right now. Retrying…"}

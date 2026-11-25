@@ -159,6 +159,11 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .sc2 .ss{color:var(--mute);font-size:clamp(14px,1.05vw,18px)}
 .sc2 .sd svg{width:clamp(90px,8vw,140px)}
 .vs{height:12px;border-radius:99px;background:#fff;overflow:hidden;margin-top:8px}.vs i{display:block;height:100%;background:var(--gold)}
+.sc2.fact{background:linear-gradient(160deg,#ffffff1c,#f6cd4c1a);border-color:#f6cd4c66}
+.fx{position:relative;font-size:clamp(16px,1.3vw,22px);min-height:6.3em}
+.fx p{position:absolute;inset:0;margin:0;font-size:1em;line-height:1.35;opacity:0;transform:translateX(24px);transition:opacity .6s,transform .6s}
+.fx p.on{opacity:1;transform:none}
+.fd{display:flex;gap:6px;margin-top:8px}.fd i{width:8px;height:8px;border-radius:50%;background:#ffffff40;transition:background .3s}.fd i.on{background:var(--gold)}
 @keyframes cardIn{from{opacity:0;transform:translateY(40px) scale(.85)}to{opacity:1;transform:none}}
 .win{position:fixed;inset:0;z-index:8;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 45%,#2a4fd0,#0a1c66 55%,#050d33);transition:opacity .8s}
 .win.out{opacity:0}
@@ -783,12 +788,23 @@ function renderStats(){
   if(S.contro&&S.contro.sd>0)cards.push({ic:"🔥",t:"Most Controversial",big:S.contro.it.name,sub:"people loved it… or really didn't",d:S.contro.it});
   if(S.underdog)cards.push({ic:"🐣",t:"The Underdog",big:S.underdog.it.name,sub:`only ${S.underdog.n} tried it, but it scored ${S.underdog.avg.toFixed(1)} — you missed out!`,d:S.underdog.it});
   if(S.sweetAvg&&S.savAvg){const w=S.sweetAvg>=S.savAvg?"Sweet":"Savory";cards.push({ic:w==="Sweet"?"🍬":"🧀",t:"Sweet vs Savory",big:`Team ${w} wins!`,sub:`sweet ${S.sweetAvg.toFixed(1)} · savory ${S.savAvg.toFixed(1)}`,vs:[S.sweetAvg,S.savAvg]})}
+  const facts=["Before it was a sufganiya, it was a German Berliner: a 16th-century European recipe that Germany made famous.",
+    "Polish Jews called it a ponchik and fried it in schmaltz instead of lard, to keep it kosher.",
+    "Polish immigrants brought it to Israel, where it got its Hebrew name from the Talmud's “spongy dough”.",
+    "Israelis buy about 15 million sufganiyot during Hanukkah week. Tonight we did our part!"];
   $("statGrid").innerHTML=cards.map((c,i)=>`<div class="sc2" style="animation-delay:${(i*.55).toFixed(2)}s">
     <div class="ic">${c.ic}</div><div class="st">${esc(c.t)}</div>${c.d?`<div class="sd">${donut(c.d,{k:"st"+i})}</div>`:""}
     <div class="sb">${esc(c.big)}</div><div class="ss">${esc(c.sub)}</div>
-    ${c.vs?`<div class="vs"><i style="width:${(c.vs[0]/(c.vs[0]+c.vs[1])*100).toFixed(1)}%"></i></div>`:""}</div>`).join("");
+    ${c.vs?`<div class="vs"><i style="width:${(c.vs[0]/(c.vs[0]+c.vs[1])*100).toFixed(1)}%"></i></div>`:""}</div>`).join("")
+    +`<div class="sc2 fact" style="animation-delay:${(cards.length*.55).toFixed(2)}s"><div class="ic">🥨</div><div class="st">Did you know?</div>
+      <div class="fx">${facts.map((f,i)=>`<p class="${i?"":"on"}">${esc(f)}</p>`).join("")}</div>
+      <div class="fd">${facts.map((f,i)=>`<i class="${i?"":"on"}"></i>`).join("")}</div></div>`;
+  clearInterval(factT);let fi=0;
+  factT=setInterval(()=>{const ps=document.querySelectorAll(".fact .fx p"),ds=document.querySelectorAll(".fact .fd i");if(!ps.length)return;
+    ps[fi].classList.remove("on");ds[fi].classList.remove("on");fi=(fi+1)%ps.length;ps[fi].classList.add("on");ds[fi].classList.add("on")},6500);
   cards.forEach((c,i)=>setTimeout(()=>SFX.pop(false),300+i*550));
 }
+let factT=0;
 function showStats(on){const el=$("stats");el.hidden=!on;if(on){renderStats();confetti(40)}}
 function renderPay(){
   const c=$("payCard");

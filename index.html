@@ -791,6 +791,7 @@ function renderStats(){
   const facts=["The first known jelly doughnut recipe comes from a German cookbook from 1532. In Germany it's still called a Berliner.",
     "Polish Jews called it a ponchik and fried it in schmaltz instead of lard, to keep it kosher.",
     "In Israel it got its Hebrew name from the Talmud's “spongy dough”. Some even link the word to the Moroccan sfenj!",
+    "Love ריבת חלב? Thank Argentina! Argentinian Jewish immigrants brought the caramel filling to Israel in the 1980s.",
     "Israelis eat around 20 million sufganiyot every Hanukkah. Tonight we did our part!"];
   $("statGrid").innerHTML=cards.map((c,i)=>`<div class="sc2" style="animation-delay:${(i*.55).toFixed(2)}s">
     <div class="ic">${c.ic}</div><div class="st">${esc(c.t)}</div>${c.d?`<div class="sd">${donut(c.d,{k:"st"+i})}</div>`:""}

@@ -349,7 +349,7 @@ function qrSvg(text,dark="#0b1d6b"){const M=makeQR(text),n=M.length,q=3;let d=""
 
 
 const MAX=8;   /* candles per rating: one per night of Hanukkah */
-const MOODS=["","Meh","Not for me","It's okay","Not bad","Tasty","So good!","Amazing!","A great miracle!"];
+const MOODS=["","Oy vey!","Not for me","It's okay","Not bad","Tasty","So good!","Amazing!","A great miracle!"];
 /* a sufganiya appears only once its form question is connected */
 for(let i=ITEMS.length-1;i>=0;i--)if(!ENTRY[ITEMS[i].id])ITEMS.splice(i,1);
 const IDS=new Set(ITEMS.map(i=>i.id));

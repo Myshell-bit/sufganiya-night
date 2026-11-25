@@ -131,6 +131,10 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 @keyframes ring{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.5);opacity:0}}
 .cd .beam{display:none;position:absolute;bottom:-5vh;width:36vw;height:130vh;background:linear-gradient(to top,#fff4,#fff0 85%);clip-path:polygon(47% 100%,53% 100%,100% 0,0 0);transform-origin:50% 100%;pointer-events:none}
 .cd.spot .beam{display:block}
+.cd.spot{background:radial-gradient(ellipse at 50% 55%,#0b1648 0%,#030924 45%,#010210 100%)}
+.cd.spot .beam{width:34vw;background:linear-gradient(to top,#fffbe8b0,#fff6d455 45%,#fff0 92%);mix-blend-mode:screen;-webkit-mask:linear-gradient(90deg,#0000,#000 30%,#000 70%,#0000);mask:linear-gradient(90deg,#0000,#000 30%,#000 70%,#0000)}
+.cd.spot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:22vh;background:radial-gradient(ellipse 60% 100% at 50% 100%,#f6cd4c22,#0000 70%);pointer-events:none}
+.cd.spot #cdT{text-shadow:0 0 24px #f6cd4c99,0 0 70px #f6cd4c55}
 .cd .b1{left:2vw;animation:sweepL 1.5s ease-in-out infinite alternate}.cd .b2{right:2vw;animation:sweepR 1.3s ease-in-out infinite alternate}
 @keyframes sweepL{from{transform:rotate(-25deg)}to{transform:rotate(35deg)}}@keyframes sweepR{from{transform:rotate(25deg)}to{transform:rotate(-35deg)}}
 #cdT{position:relative}

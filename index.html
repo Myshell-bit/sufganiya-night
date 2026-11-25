@@ -766,10 +766,13 @@ function computeStats(){
   const pick=(arr,key,dir)=>{if(!arr.length)return null;const best=dir>0?Math.max(...arr.map(key)):Math.min(...arr.map(key));const w=arr.filter(x=>Math.abs(key(x)-best)<1e-9);return{names:w.slice(0,2).map(x=>x.name).join(" & ")+(w.length>2?` +${w.length-2}`:""),val:best}};
   const critic=pick(people,x=>x.avg,-1),sweet=pick(people,x=>x.avg,1),explorer=pick(people,x=>x.n,1);
   const per=ITEMS.map(it=>{const v=rows.map(x=>x.r[it.id]).filter(Boolean),m=v.length?v.reduce((a,b)=>a+b,0)/v.length:0;
-    return{it,n:v.length,fives:v.filter(x=>x===5).length,sd:v.length>1?Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/v.length):0}});
-  const contro=per.filter(x=>x.n>=2).sort((a,b)=>b.sd-a.sd)[0],darling=per.filter(x=>x.fives).sort((a,b)=>b.fives-a.fives)[0];
+    return{it,n:v.length,avg:m,sd:v.length>1?Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/v.length):0}});
+  const contro=per.filter(x=>x.n>=2).sort((a,b)=>b.sd-a.sd)[0];
+  /* underdog: tasted by the fewest guests, yet rated above the night's average */
+  const night=all.length?candles/all.length:0,maxN=Math.max(0,...per.map(x=>x.n));
+  const underdog=per.filter(x=>x.n>=1&&x.n<maxN&&x.avg>night).sort((a,b)=>a.n-b.n||b.avg-a.avg)[0];
   const team=k=>{const v=rows.flatMap(x=>ITEMS.filter(i=>(k==="Savory")===(i.kind==="Savory")).map(i=>x.r[i.id]).filter(Boolean));return v.length?v.reduce((a,b)=>a+b,0)/v.length:0};
-  return{candles,critic,sweet,explorer,contro,darling,sweetAvg:team("Sweet"),savAvg:team("Savory"),voters:rows.length};
+  return{candles,critic,sweet,explorer,contro,underdog,night,sweetAvg:team("Sweet"),savAvg:team("Savory"),voters:rows.length};
 }
 function renderStats(){
   const S=computeStats(),cards=[];
@@ -778,7 +781,7 @@ function renderStats(){
   if(S.sweet)cards.push({ic:"🥰",t:"Biggest Sweetheart",big:S.sweet.names,sub:`gave an average of ${S.sweet.val.toFixed(1)} candles`});
   if(S.explorer)cards.push({ic:"🧭",t:"Sufganiya Explorer",big:S.explorer.names,sub:`tasted ${S.explorer.val} sufganiyot`});
   if(S.contro&&S.contro.sd>0)cards.push({ic:"🔥",t:"Most Controversial",big:S.contro.it.name,sub:"people loved it… or really didn't",d:S.contro.it});
-  if(S.darling)cards.push({ic:"💛",t:"Crowd's Darling",big:S.darling.it.name,sub:`${S.darling.fives} perfect 5-candle rating${S.darling.fives===1?"":"s"}`,d:S.darling.it});
+  if(S.underdog)cards.push({ic:"🐣",t:"The Underdog",big:S.underdog.it.name,sub:`only ${S.underdog.n} tried it, but it scored ${S.underdog.avg.toFixed(1)} — you missed out!`,d:S.underdog.it});
   if(S.sweetAvg&&S.savAvg){const w=S.sweetAvg>=S.savAvg?"Sweet":"Savory";cards.push({ic:w==="Sweet"?"🍬":"🧀",t:"Sweet vs Savory",big:`Team ${w} wins!`,sub:`sweet ${S.sweetAvg.toFixed(1)} · savory ${S.savAvg.toFixed(1)}`,vs:[S.sweetAvg,S.savAvg]})}
   $("statGrid").innerHTML=cards.map((c,i)=>`<div class="sc2" style="animation-delay:${(i*.55).toFixed(2)}s">
     <div class="ic">${c.ic}</div><div class="st">${esc(c.t)}</div>${c.d?`<div class="sd">${donut(c.d,{k:"st"+i})}</div>`:""}
